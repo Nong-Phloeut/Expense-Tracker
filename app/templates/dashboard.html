@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Dashboard</h1>
+
+<div class="row">
+    <!-- Summary Cards -->
+    <div class="col-md-4 mb-3">
+        <div class="card text-white bg-primary h-100">
+            <div class="card-body">
+                <h5 class="card-title">Total Expenses</h5>
+                <p class="card-text" id="totalExpenses">$0</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card text-white bg-success h-100">
+            <div class="card-body">
+                <h5 class="card-title">Budget Remaining</h5>
+                <p class="card-text" id="budgetRemaining">$0</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card text-white bg-warning h-100">
+            <div class="card-body">
+                <h5 class="card-title">Alerts</h5>
+                <p class="card-text" id="alertCount">0</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts -->
+<div class="row mt-4">
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Expenses by Category</h5>
+                <div style="height: 400px;">
+                    <canvas id="expensesDoughnutChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Expenses Over Time</h5>
+                <div style="height: 400px;">
+                    <canvas id="expensesLineChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Sample data
+    const totalExpenses = 1200;
+    const budgetRemaining = 800;
+    const alertCount = 2;
+
+    document.getElementById('totalExpenses').textContent = `$${totalExpenses}`;
+    document.getElementById('budgetRemaining').textContent = `$${budgetRemaining}`;
+    document.getElementById('alertCount').textContent = alertCount;
+
+    // Line chart for expenses over time
+    const ctxLine = document.getElementById('expensesLineChart').getContext('2d');
+    new Chart(ctxLine, {
+        type: 'line',
+        data: {
+            labels: ['Oct 1', 'Oct 2', 'Oct 3', 'Oct 4', 'Oct 5', 'Oct 6'],
+            datasets: [{
+                label: 'Expenses ($)',
+                data: [50, 75, 100, 150, 80, 200],
+                borderColor: 'rgba(54, 162, 235, 1)',
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: true } },
+            scales: {
+                x: { title: { display: true, text: 'Date' } },
+                y: { title: { display: true, text: 'Amount ($)' } }
+            }
+        }
+    });
+
+    // Doughnut chart for category-wise expenses
+    const ctxDoughnut = document.getElementById('expensesDoughnutChart').getContext('2d');
+    new Chart(ctxDoughnut, {
+        type: 'doughnut',
+        data: {
+            labels: ['Food', 'Transport', 'Utilities', 'Entertainment', 'Others'],
+            datasets: [{
+                label: 'Expenses by Category',
+                data: [300, 200, 150, 100, 450],
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.7)',
+                    'rgba(54, 162, 235, 0.7)',
+                    'rgba(255, 206, 86, 0.7)',
+                    'rgba(75, 192, 192, 0.7)',
+                    'rgba(153, 102, 255, 0.7)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { position: 'right' } }
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,41 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Expense Tracker{% endblock %}</title>
+    <link href="{% static 'css/style.css' %}" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+</head>
+
+<body>
+
+    {% if user.is_authenticated %}
+    <!-- Authenticated layout -->
+    <div class="d-flex">
+        {% include 'includes/_sidebar.html' %}
+        <div class="container-fluid p-0">
+            {% include 'includes/_navbar.html' %}
+            <div class="container-fluid p-4">
+                {% block page_content %}{% endblock %}
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <!-- Public layout (Login / Signup etc.) -->
+    <div class="d-flex justify-content-center align-items-center" style="height: 100vh; background-color: #f8f9fa;">
+        <div class="content-wrapper">
+            {% block public_content %}{% endblock %}
+        </div>
+    </div>
+    {% endif %}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'js/scripts.js' %}"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% block title %}Alerts{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Alerts</h2>
+    <!-- Button to trigger modal -->
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#alertModal">Add Alert</button>
+</div>
+
+<!-- Alerts Table -->
+<table class="table table-striped table-hover">
+    <thead class="table-dark">
+        <tr>
+            <th>#</th>
+            <th>Alert Name</th>
+            <th>Condition</th>
+            <th>Amount</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- Example static rows -->
+        <tr>
+            <td>1</td>
+            <td>Monthly Budget Limit</td>
+            <td>Exceeds Budget</td>
+            <td>$500</td>
+            <td><span class="badge bg-success">Active</span></td>
+            <td>
+                <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#alertModal">Edit</button>
+                <button class="btn btn-sm btn-danger">Delete</button>
+            </td>
+        </tr>
+        <tr>
+            <td>2</td>
+            <td>High Expense Alert</td>
+            <td>Single Expense &gt; $100</td>
+            <td>$100</td>
+            <td><span class="badge bg-danger">Inactive</span></td>
+            <td>
+                <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#alertModal">Edit</button>
+                <button class="btn btn-sm btn-danger">Delete</button>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<!-- Modal for Add/Edit Alert -->
+<div class="modal fade" id="alertModal" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="alertModalLabel">Add / Edit Alert</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="alertForm">
+                    <div class="mb-3">
+                        <label for="alertName" class="form-label">Alert Name</label>
+                        <input type="text" class="form-control" id="alertName" placeholder="Enter alert name">
+                    </div>
+                    <div class="mb-3">
+                        <label for="condition" class="form-label">Condition</label>
+                        <input type="text" class="form-control" id="condition" placeholder="Ex: Expense exceeds budget">
+                    </div>
+                    <div class="mb-3">
+                        <label for="amount" class="form-label">Amount</label>
+                        <input type="number" class="form-control" id="amount" placeholder="Enter amount" step="0.01">
+                    </div>
+                    <div class="mb-3">
+                        <label for="status" class="form-label">Status</label>
+                        <select class="form-select" id="status">
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="submitAlert()">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function submitAlert() {
+    const alertName = document.getElementById('alertName').value;
+    const condition = document.getElementById('condition').value;
+    const amount = document.getElementById('amount').value;
+    const status = document.getElementById('status').value;
+
+    console.log('Alert submitted:', {alertName, condition, amount, status});
+    alert('Alert saved! (Check console log)');
+
+    // Close modal
+    const modal = bootstrap.Modal.getInstance(document.getElementById('alertModal'));
+    modal.hide();
+}
+</script>
+{% endblock %}
