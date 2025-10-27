@@ -10,6 +10,8 @@ urlpatterns = [
     path('visualization', views.visualization, name='visualization'),
     path('reports', views.reports, name='reports'),
     path('categories', views.category_management, name='category_management'),
+    path('categories/delete/<int:id>/', views.delete_category, name='delete_category'),
     path('recurring', views.recurring_expenses, name='recurring_expenses'),
     path('alerts', views.alerts, name='alerts'),
 ]
+    
