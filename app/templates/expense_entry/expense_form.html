@@ -1,0 +1,59 @@
+<div class="modal fade" id="expenseModal" tabindex="-1" aria-labelledby="expenseModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <form method="POST" action="">
+        {% csrf_token %}
+        <input type="hidden" name="expense_id" id="expenseId">
+
+        <div class="modal-header">
+          <h5 class="modal-title" id="expenseModalLabel">Add Expense</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="expenseDate" class="form-label">Date</label>
+            <input type="date" class="form-control" name="date" id="expenseDate" value="{{ today|date:'Y-m-d' }}">
+          </div>
+
+          <div class="mb-3">
+            <label for="category" class="form-label">Category</label>
+            <select class="form-select" name="category" id="category">
+              <option value="">Select Category</option>
+              {% for cat in categories %}
+              <option value="{{ cat.id }}">{{ cat.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label for="description" class="form-label">Description</label>
+            <input type="text" class="form-control" name="description" id="description" placeholder="Enter description">
+          </div>
+
+          <div class="mb-3">
+            <label for="amount" class="form-label">Amount</label>
+            <input type="number" class="form-control" name="amount" id="amount" placeholder="Enter amount" step="0.01" required>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+function openExpenseForm(id = '', date = '', categoryId = '', description = '', amount = '') {
+  document.getElementById('expenseId').value = id;
+  document.getElementById('expenseDate').value = date || '{{ today|date:"Y-m-d" }}';
+  document.getElementById('category').value = categoryId;
+  document.getElementById('description').value = description;
+  document.getElementById('amount').value = amount;
+
+  document.getElementById('expenseModalLabel').textContent = id ? 'Edit Expense' : 'Add Expense';
+}
+</script>

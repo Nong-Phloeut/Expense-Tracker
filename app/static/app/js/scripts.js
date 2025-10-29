@@ -8,3 +8,14 @@ window.addEventListener("DOMContentLoaded", (event) => {
     }
   }, 3000); // 3 seconds
 });
+
+document.addEventListener("DOMContentLoaded", function () {
+  const deleteModal = document.getElementById("deleteModal");
+  const confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
+
+  deleteModal.addEventListener("show.bs.modal", function (event) {
+    const button = event.relatedTarget;
+    const url = button.getAttribute("data-url");
+    confirmDeleteBtn.setAttribute("href", url);
+  });
+});

@@ -5,27 +5,35 @@
 
 <div class="row">
     <!-- Summary Cards -->
-    <div class="col-md-4 mb-3">
+    <div class="col-md-3 mb-3">
         <div class="card text-white bg-primary h-100">
             <div class="card-body">
-                <h5 class="card-title">Total Expenses</h5>
-                <p class="card-text" id="totalExpenses">$0</p>
+                <p class="card-title">Total Expenses</p>
+                <h4 class="card-text" id="totalExpenses">$0</h4>
             </div>
         </div>
     </div>
-    <div class="col-md-4 mb-3">
+    <div class="col-md-3 mb-3">
         <div class="card text-white bg-success h-100">
             <div class="card-body">
-                <h5 class="card-title">Budget Remaining</h5>
-                <p class="card-text" id="budgetRemaining">$0</p>
+                <p class="card-title">Budget Remaining</p>
+                <h4 class="card-text" id="budgetRemaining">$0</h4>
             </div>
         </div>
     </div>
-    <div class="col-md-4 mb-3">
+    <div class="col-md-3 mb-3">
         <div class="card text-white bg-warning h-100">
             <div class="card-body">
-                <h5 class="card-title">Alerts</h5>
-                <p class="card-text" id="alertCount">0</p>
+                <p class="card-title">Alerts</p>
+                <h4 class="card-text" id="alertCount">0</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card text-white bg-info h-100">
+            <div class="card-body">
+                <p class="card-title">Recurring Expenses / Month</p>
+                <h4 class="card-text" id="alertCount">${{ recurring_total }}</h4>
             </div>
         </div>
     </div>
@@ -52,30 +60,41 @@
                 </div>
             </div>
         </div>
+        <!-- <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Monthly Trend</h5>
+                <div style="height: 400px;">
+                    <canvas id="monthlyBarChart"></canvas>
+                </div>
+            </div>
+        </div> -->
     </div>
 
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // Sample data
-    const totalExpenses = 1200;
-    const budgetRemaining = 800;
-    const alertCount = 2;
+    const totalExpenses = {{ total_expenses|default:0 }};
+    const budgetRemaining = {{ budget_remaining|default:0 }};
+    const alertCount = {{ alert_count|default:0 }};
 
     document.getElementById('totalExpenses').textContent = `$${totalExpenses}`;
     document.getElementById('budgetRemaining').textContent = `$${budgetRemaining}`;
     document.getElementById('alertCount').textContent = alertCount;
 
-    // Line chart for expenses over time
-    const ctxLine = document.getElementById('expensesLineChart').getContext('2d');
-    new Chart(ctxLine, {
+    const labels = {{ date_labels|safe }};
+    const expensesData = {{ expenses_by_day|safe }};
+    const categoryLabels = {{ category_labels|safe }};
+    const categoryData = {{ category_totals|safe }};
+
+    // Line chart
+    new Chart(document.getElementById('expensesLineChart'), {
         type: 'line',
         data: {
-            labels: ['Oct 1', 'Oct 2', 'Oct 3', 'Oct 4', 'Oct 5', 'Oct 6'],
+            labels: labels,
             datasets: [{
                 label: 'Expenses ($)',
-                data: [50, 75, 100, 150, 80, 200],
+                data: expensesData,
                 borderColor: 'rgba(54, 162, 235, 1)',
                 backgroundColor: 'rgba(54, 162, 235, 0.2)',
                 fill: true,
@@ -92,15 +111,14 @@
         }
     });
 
-    // Doughnut chart for category-wise expenses
-    const ctxDoughnut = document.getElementById('expensesDoughnutChart').getContext('2d');
-    new Chart(ctxDoughnut, {
+    // Doughnut chart
+    new Chart(document.getElementById('expensesDoughnutChart'), {
         type: 'doughnut',
         data: {
-            labels: ['Food', 'Transport', 'Utilities', 'Entertainment', 'Others'],
+            labels: categoryLabels,
             datasets: [{
                 label: 'Expenses by Category',
-                data: [300, 200, 150, 100, 450],
+                data: categoryData,
                 backgroundColor: [
                     'rgba(255, 99, 132, 0.7)',
                     'rgba(54, 162, 235, 0.7)',
@@ -108,20 +126,67 @@
                     'rgba(75, 192, 192, 0.7)',
                     'rgba(153, 102, 255, 0.7)'
                 ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { position: 'top' } }
+        }
+    });
+    const recurringTotal = {{ recurring_total|floatformat:2 }};
+    const oneTimeTotal = {{ one_time_total|floatformat:2 }};
+
+    new Chart(document.getElementById('recurringPieChart'), {
+        type: 'pie',
+        data: {
+            labels: ['Recurring Expenses', 'One-time Expenses'],
+            datasets: [{
+                data: [recurringTotal, oneTimeTotal],
+                backgroundColor: [
+                    'rgba(54, 162, 235, 0.7)',
+                    'rgba(255, 99, 132, 0.7)'
+                ],
                 borderColor: [
-                    'rgba(255, 99, 132, 1)',
                     'rgba(54, 162, 235, 1)',
-                    'rgba(255, 206, 86, 1)',
-                    'rgba(75, 192, 192, 1)',
-                    'rgba(153, 102, 255, 1)'
+                    'rgba(255, 99, 132, 1)'
                 ],
                 borderWidth: 1
             }]
         },
         options: {
             responsive: true,
-            plugins: { legend: { position: 'right' } }
+            plugins: {
+                legend: { position: 'right' },
+                tooltip: { enabled: true }
+            }
+        }
+    });
+
+    const monthLabels = {{ month_labels|safe }};
+    const monthlyTotals = {{ monthly_totals|safe }};
+
+    new Chart(document.getElementById('monthlyBarChart'), {
+        type: 'bar',
+        data: {
+            labels: monthLabels,
+            datasets: [{
+                label: 'Total Expenses ($)',
+                data: monthlyTotals,
+                backgroundColor: 'rgba(75, 192, 192, 0.7)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { title: { display: true, text: 'Month' } },
+                y: { title: { display: true, text: 'Amount ($)' }, beginAtZero: true }
+            }
         }
     });
 </script>
+
 {% endblock %}

@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+{% block title %}Budget Planning{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Budget Planning</h2>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#budgetModal" onclick="resetForm()">
+        Add Budget
+    </button>
+</div>
+
+<table class="table table-striped table-hover align-middle">
+    <thead class="table-dark">
+        <tr>
+            <th>#</th>
+            <th>Category</th>
+            <th>Amount</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% if budgets %}
+        {% for budget in budgets %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>
+                {% if budget.category %}
+                {{ budget.category.name }}
+                {% else %}
+                —
+                {% endif %}
+            </td>
+
+            <td>${{ budget.amount }}</td>
+            <td>{{ budget.start_date }}</td>
+            <td>{{ budget.end_date }}</td>
+            <td>
+                <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#budgetModal"
+                    onclick="editBudget('{{ budget.id }}', '{{ budget.category.id|default_if_none:'' }}', '{{ budget.amount }}', '{{ budget.start_date|date:'Y-m-d' }}', '{{ budget.end_date|date:'Y-m-d' }}')">
+                    Edit
+                </button>
+                <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal"
+                    data-url="{% url 'budget_delete' budget.id %}">
+                    Delete
+                </button>
+            </td>
+        </tr>
+        {% endfor %}
+        {% else %}
+        <tr>
+            <td colspan="6" class="text-center">No budgets found.</td>
+        </tr>
+        {% endif %}
+    </tbody>
+</table>
+
+<!-- Pagination -->
+{% if budgets.paginator %}
+<div class="row mt-4">
+    <div class="col-md-6">
+        <p class="text-muted mb-0">
+            Showing {{ budgets.start_index }} to {{ budgets.end_index }} of
+            {{ budgets.paginator.count }} budgets
+        </p>
+    </div>
+    <div class="col-md-6">
+        <nav aria-label="Pagination">
+            <ul class="pagination justify-content-end">
+                {% if budgets.has_previous %}
+                <li class="page-item"><a class="page-link" href="?page={{ budgets.previous_page_number }}">Previous</a>
+                </li>
+                {% else %}
+                <li class="page-item disabled"><span class="page-link">Previous</span></li>
+                {% endif %}
+
+                {% for num in budgets.paginator.page_range %}
+                {% if budgets.number == num %}
+                <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                {% else %}
+                <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                {% endif %}
+                {% endfor %}
+
+                {% if budgets.has_next %}
+                <li class="page-item"><a class="page-link" href="?page={{ budgets.next_page_number }}">Next</a></li>
+                {% else %}
+                <li class="page-item disabled"><span class="page-link">Next</span></li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+</div>
+
+{% endif %}
+
+<!-- Modal -->
+<div class="modal fade" id="budgetModal" tabindex="-1" aria-labelledby="budgetModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            {% include 'budget_planning/_budget_form.html' %}
+        </div>
+    </div>
+</div>
+
+
+<script>
+    function editBudget(id, categoryId, amount, start, end) {
+        document.getElementById('budget_id').value = id;
+        document.getElementById('category').value = categoryId;
+        document.getElementById('amount').value = amount;
+        document.getElementById('start_date').value = start;
+        document.getElementById('end_date').value = end;
+        document.getElementById('budgetModalLabel').innerText = 'Edit Budget';
+    }
+
+    function resetForm() {
+        document.getElementById('budgetForm').reset();
+        document.getElementById('budget_id').value = '';
+        document.getElementById('budgetModalLabel').innerText = 'Add Budget';
+    }
+</script>
+{% endblock %}

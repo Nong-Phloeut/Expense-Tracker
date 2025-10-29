@@ -10,27 +10,26 @@
             class="list-group-item list-group-item-action border-0 py-3 {% if request.path == '/dashboard' %}active-link{% else %}bg-dark text-white{% endif %}">
             <i class="fas fa-home fa-fw me-3"></i> Dashboard
         </a>
+        <a href="{% url 'category_management' %}"
+            class="list-group-item list-group-item-action border-0 py-3 {% if request.path == '/categories' %}active-link{% else %}bg-dark text-white{% endif %}">
+            <i class="fas fa-tags fa-fw me-3"></i> Categories
+        </a>
         <a href="{% url 'expense_entry' %}"
             class="list-group-item list-group-item-action border-0 py-3 {% if request.path == '/expenses' %}active-link{% else %}bg-dark text-white{% endif %}">
             <i class="fas fa-plus-circle fa-fw me-3"></i> Expense Entry
-        </a>
-        <a href="{% url 'reports' %}"
-            class="list-group-item list-group-item-action border-0 py-3 {% if request.path == '/reports' %}active-link{% else %}bg-dark text-white{% endif %}">
-            <i class="fas fa-chart-line fa-fw me-3"></i> Reports
         </a>
         <a href="{% url 'budget_planning' %}"
             class="list-group-item list-group-item-action border-0 py-3 {% if request.path == '/budget' %}active-link{% else %}bg-dark text-white{% endif %}">
             <i class="fas fa-wallet fa-fw me-3"></i> Budget Planning
         </a>
-        <a href="{% url 'category_management' %}"
-            class="list-group-item list-group-item-action border-0 py-3 {% if request.path == '/categories' %}active-link{% else %}bg-dark text-white{% endif %}">
-            <i class="fas fa-tags fa-fw me-3"></i> Categories
-        </a>
         <a href="{% url 'recurring_expenses' %}"
             class="list-group-item list-group-item-action border-0 py-3 {% if request.path == '/recurring' %}active-link{% else %}bg-dark text-white{% endif %}">
             <i class="fas fa-redo fa-fw me-3"></i> Recurring Expenses
         </a>
-
+        <a href="{% url 'reports' %}"
+            class="list-group-item list-group-item-action border-0 py-3 {% if request.path == '/reports' %}active-link{% else %}bg-dark text-white{% endif %}">
+            <i class="fas fa-chart-line fa-fw me-3"></i> Reports
+        </a>
         <hr class="mx-3 my-2 text-secondary">
 
         <a href="{% url 'alerts' %}"
