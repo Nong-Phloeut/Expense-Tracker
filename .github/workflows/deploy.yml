@@ -32,11 +32,12 @@ jobs:
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_SSH_KEY }}
 
-      - name: Deploy to Cloud Run (pull image from Docker Hub)
+      - name: Deploy to VM
         run: |
-          gcloud run deploy expense-tracker \
-            --image=docker.io/${{ secrets.DOCKER_USERNAME }}/expense-tracker:latest \
-            --platform=managed \
-            --region=asia-southeast1 \
-            --allow-unauthenticated \
-            --port=8080
+          ssh -i ${{ secrets.VM_SSH_KEY }} ${{ secrets.VM_USER }}@${{ secrets.SERVER_IP }} "
+            docker pull docker.io/${{ secrets.DOCKER_USERNAME }}/expense-tracker:latest &&
+            docker stop expense-tracker || true &&
+            docker rm expense-tracker || true &&
+            docker run -d --name expense-tracker -p 8080:8080 docker.io/${{ secrets.DOCKER_USERNAME }}/expense-tracker:latest
+          "
+
