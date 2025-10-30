@@ -25,19 +25,36 @@ jobs:
       - name: Push to Docker Hub
         run: docker push ${{ secrets.DOCKER_USERNAME }}/expense-tracker:latest
 
-      - name: Set up Google Cloud SDK
-        uses: google-github-actions/setup-gcloud@v2
+      - name: Cleanup old Docker
+        uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.SERVER_IP }}
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_SSH_KEY }}
+          script: |
+            cd ~/expense-tracker || mkdir -p ~/expense-tracker
+            docker compose down --remove-orphans || true
+            docker image prune -af || true
+            docker container prune -f || true
 
-      - name: Deploy to VM
-        run: |
-          ssh -i ${{ secrets.VM_SSH_KEY }} ${{ secrets.VM_USER }}@${{ secrets.SERVER_IP }} "
-            docker pull docker.io/${{ secrets.DOCKER_USERNAME }}/expense-tracker:latest &&
-            docker stop expense-tracker || true &&
-            docker rm expense-tracker || true &&
-            docker run -d --name expense-tracker -p 8080:8080 docker.io/${{ secrets.DOCKER_USERNAME }}/expense-tracker:latest
-          "
+      - name: Copy docker-compose.yml to server
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          source: "docker-compose.yml"
+          target: "~/expense-tracker"
+
+      - name: Deploy to server
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          script: |
+            cd ~/expense-tracker
+            docker pull ${{ secrets.DOCKER_USERNAME }}/expense-tracker:latest
+            docker compose up -d --remove-orphans
+
 
