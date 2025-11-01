@@ -19,7 +19,7 @@ services:
       - expense_net
 
   nginx:
-    image: nginx:latest
+    image: nongdev/nginx:latest
     container_name: expense-tracker-nginx
     restart: always
     ports:
