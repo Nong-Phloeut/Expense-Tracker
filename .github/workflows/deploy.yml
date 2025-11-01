@@ -1,5 +1,4 @@
 name: CI/CD to Google Cloud Run
-
 on:
   push:
     branches:
@@ -22,7 +21,7 @@ jobs:
       - name: Build Docker image
         run: docker build -t ${{ secrets.DOCKER_USERNAME }}/expense-tracker:latest .
 
-      - name: Push to Docker Hub
+      - name: Push Docker image
         run: docker push ${{ secrets.DOCKER_USERNAME }}/expense-tracker:latest
 
   deploy:
@@ -32,30 +31,27 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Authenticate with GCP using service account
-      - name: Authenticate to GCP
-        uses: google-github-actions/auth@v1
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v0.1.7
         with:
-          credentials_json: ${{ secrets.GCP_SA_KEY }} # any placeholder value can be put here
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: 22
+          script: |
+            # Create project folder if it doesn't exist
+            mkdir -p ~/expense-tracker
+            cd ~/expense-tracker
 
-      # Copy docker-compose.yml to VM
-      - name: Copy docker-compose.yml to server
-        run: |
-          gcloud compute scp docker-compose.yml nongphoeut@prod-webserver:~/expense-tracker \
-          --zone=${{ secrets.GCP_VM_ZONE }} --quiet
-        env:
-          GCP_PROJECT: ${{ secrets.GCP_PROJECT }} # optional project value placeholder
-
-      # Deploy on VM
-      - name: SSH and deploy
-        run: |
-          gcloud compute ssh nongphoeut@prod-webserver --zone=${{ secrets.GCP_VM_ZONE }} --command="
-            cd ~/expense-tracker || mkdir -p ~/expense-tracker
+            # Stop current containers
             docker compose down --remove-orphans || true
+
+            # Clean old images and containers
             docker image prune -af || true
             docker container prune -f || true
+
+            # Pull latest Docker image
             docker pull ${{ secrets.DOCKER_USERNAME }}/expense-tracker:latest
+
+            # Start containers
             docker compose up -d --remove-orphans
-          " --quiet
-        env:
-          GCP_PROJECT: ${{ secrets.GCP_PROJECT }}
