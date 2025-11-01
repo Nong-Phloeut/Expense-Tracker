@@ -47,7 +47,7 @@ jobs:
             docker network prune -f || true
 
             rm -rf ~/expense-tracker/docker-compose.yml
-            mkdir -p ~/expense-tracker
+            mkdir -p ~/expense-tracker || true
 
       # Copy docker-compose.yml
       - name: Copy docker-compose.yml to server
@@ -68,7 +68,7 @@ jobs:
           port: 22
           script: |
             # Create project folder if it doesn't exist
-            mkdir -p ~/expense-tracker
+            mkdir -p ~/expense-tracker || true
             cd ~/expense-tracker
 
             # Stop current containers
