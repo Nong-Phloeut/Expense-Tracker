@@ -2,15 +2,15 @@ name: CI/CD Expense Tracker
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
   build-push:
     runs-on: ubuntu-latest
     env:
-      IMAGE: ${{ secrets.DOCKER_USERNAME }}/expense-tracker
+      IMAGE_APP: ${{ secrets.DOCKER_USERNAME }}/expense-tracker
+      IMAGE_NGINX: ${{ secrets.DOCKER_USERNAME }}/nginx
       IMAGE_TAG: ${{ github.sha }}
 
     steps:
@@ -23,13 +23,17 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build Docker image
-        run: docker build -t $IMAGE:latest -t $IMAGE:$IMAGE_TAG .
-
-      - name: Push Docker image
+      - name: Build Docker app image & push
         run: |
-          docker push $IMAGE:latest
-          docker push $IMAGE:$IMAGE_TAG
+            build -t $IMAGE_APP:latest -t $IMAGE_APP:$IMAGE_TAG .
+            docker push $IMAGE_APP:latest
+            docker push $IMAGE_APP:$IMAGE_TAG
+
+      - name: Build nginx image & push
+        run: |
+            build -t $IMAGE_NGINX:latest -t $IMAGE_NGINX:$IMAGE_TAG .
+            docker push $IMAGE_NGINX:latest
+            docker push $IMAGE_NGINX:$IMAGE_TAG
 
   deploy:
     runs-on: ubuntu-latest
@@ -52,11 +56,15 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: 22
           script: |
+            set -e
             echo ">>> Deploying Expense Tracker..."
             cd $SERVER_PATH
 
+            # Pull latest images
+            docker pull ${{ secrets.DOCKER_USERNAME }}/expense-tracker:latest
+            docker pull ${{ secrets.DOCKER_USERNAME }}/nginx:latest
+
             docker-compose down --remove-orphans
-            docker pull $IMAGE:latest
             docker-compose up -d --build
 
             echo ">>> Deployment finished successfully!"
