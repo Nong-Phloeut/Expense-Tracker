@@ -44,7 +44,7 @@ jobs:
             cd ~/expense-tracker
 
             # Stop current containers
-            docker compose down --remove-orphans || true
+            docker-compose down --remove-orphans || true
 
             # Clean old images and containers
             docker image prune -af || true
@@ -54,4 +54,4 @@ jobs:
             docker pull ${{ secrets.DOCKER_USERNAME }}/expense-tracker:latest
 
             # Start containers
-            docker compose up -d --remove-orphans
+            docker-compose up -d --remove-orphans
