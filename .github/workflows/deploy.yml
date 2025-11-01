@@ -35,7 +35,7 @@ jobs:
       # 4️⃣ Build and push Nginx image
       - name: Build & Push Nginx Image
         run: |
-          docker build -t $IMAGE_NGINX:latest -t $IMAGE_NGINX:$IMAGE_TAG -f nginx/ .
+          docker build -t $IMAGE_NGINX:latest -t $IMAGE_NGINX:$IMAGE_TAG -f ./nginx
           docker push $IMAGE_NGINX:latest
           docker push $IMAGE_NGINX:$IMAGE_TAG
 
