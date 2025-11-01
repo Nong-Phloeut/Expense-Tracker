@@ -6,12 +6,12 @@ services:
     container_name: expense-tracker
     restart: always
     ports:
-      - "80:8000"
+      - "8080:8080"
     env_file:
       - .env
     depends_on:
       - db
-    command: gunicorn expense_tracker.wsgi:application --bind 0.0.0.0:8000
+    command: gunicorn expense_tracker.wsgi:application --bind 0.0.0.0:8080
 
   db:
     image: postgres:15
