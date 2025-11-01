@@ -1,4 +1,5 @@
 name: CI/CD to Google Cloud Run
+
 on:
   push:
     branches:
@@ -19,19 +20,24 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build Docker image
-        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/expense-tracker:latest .
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/expense-tracker:latest .
 
       - name: Push Docker image
-        run: docker push ${{ secrets.DOCKER_USERNAME }}/expense-tracker:latest
+        run: |
+          docker push ${{ secrets.DOCKER_USERNAME }}/expense-tracker:latest
 
   deploy:
     runs-on: ubuntu-latest
     needs: build-push
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-         # Clean old docker stuff on VM
+      # --------------------------
+      # Cleanup old Docker stuff on VM
+      # --------------------------
       - name: Cleanup old Docker
         uses: appleboy/ssh-action@v1
         with:
@@ -40,16 +46,20 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
             echo ">>> Removing old containers & images but KEEPING volumes..."
-            cd ~/expense-tracker || true
+            PROJECT_DIR="/home/${{ secrets.VM_USER }}/expense-tracker"
+            mkdir -p $PROJECT_DIR
+            cd $PROJECT_DIR || exit 1
             docker-compose down --remove-orphans || true
-            docker image prune -af || true   # only images, not volumes
+            docker image prune -af || true
             docker container prune -f || true
             docker network prune -f || true
 
-            rm -rf ~/expense-tracker/docker-compose.yml
-            mkdir -p ~/expense-tracker || true
+            # Remove old docker-compose.yml only
+            rm -f $PROJECT_DIR/docker-compose.yml
 
-      # Copy docker-compose.yml
+      # --------------------------
+      # Copy docker-compose.yml to server
+      # --------------------------
       - name: Copy docker-compose.yml to server
         uses: appleboy/scp-action@master
         with:
@@ -59,6 +69,9 @@ jobs:
           source: "docker-compose.yml"
           target: "/home/${{ secrets.VM_USER }}/expense-tracker"
 
+      # --------------------------
+      # Deploy via SSH
+      # --------------------------
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1
         with:
@@ -67,19 +80,12 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: 22
           script: |
-            # Create project folder if it doesn't exist
-            mkdir -p ~/expense-tracker || true
-            cd ~/expense-tracker
+            PROJECT_DIR="/home/${{ secrets.VM_USER }}/expense-tracker"
+            mkdir -p $PROJECT_DIR
+            cd $PROJECT_DIR || exit 1
 
-            # Stop current containers
-            docker-compose down --remove-orphans || true
-
-            # Clean old images and containers
-            docker image prune -af || true
-            docker container prune -f || true
-
-            # Pull latest Docker image
+            echo ">>> Pulling latest Docker image..."
             docker pull ${{ secrets.DOCKER_USERNAME }}/expense-tracker:latest
 
-            # Start containers
+            echo ">>> Starting containers..."
             docker-compose up -d --remove-orphans
