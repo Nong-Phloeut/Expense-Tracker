@@ -10,39 +10,44 @@ jobs:
     runs-on: ubuntu-latest
     env:
       IMAGE_APP: ${{ secrets.DOCKER_USERNAME }}/expense-tracker
-      IMAGE_NGINX: ${{ secrets.DOCKER_USERNAME }}/nginx
+      IMAGE_NGINX: ${{ secrets.DOCKER_USERNAME }}/expense-tracker-nginx
       IMAGE_TAG: ${{ github.sha }}
 
     steps:
+      # 1️⃣ Checkout your repo
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Login to Docker Hub
+      # 2️⃣ Login to Docker Hub
+      - name: Docker Login
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build Docker app image & push
+      # 3️⃣ Build and push Django app image
+      - name: Build & Push App Image
         run: |
-            build -t $IMAGE_APP:latest -t $IMAGE_APP:$IMAGE_TAG .
-            docker push $IMAGE_APP:latest
-            docker push $IMAGE_APP:$IMAGE_TAG
+          docker build -t $IMAGE_APP:latest -t $IMAGE_APP:$IMAGE_TAG -f Dockerfile .
+          docker push $IMAGE_APP:latest
+          docker push $IMAGE_APP:$IMAGE_TAG
 
-      - name: Build nginx image & push
+      # 4️⃣ Build and push Nginx image
+      - name: Build & Push Nginx Image
         run: |
-            build -t $IMAGE_NGINX:latest -t $IMAGE_NGINX:$IMAGE_TAG .
-            docker push $IMAGE_NGINX:latest
-            docker push $IMAGE_NGINX:$IMAGE_TAG
+          docker build -t $IMAGE_NGINX:latest -t $IMAGE_NGINX:$IMAGE_TAG -f nginx/Dockerfile .
+          docker push $IMAGE_NGINX:latest
+          docker push $IMAGE_NGINX:$IMAGE_TAG
 
   deploy:
     runs-on: ubuntu-latest
     needs: build-push
     env:
-      IMAGE: ${{ secrets.DOCKER_USERNAME }}/expense-tracker
       SERVER_USER: ${{ secrets.VM_USER }}
       SERVER_HOST: ${{ secrets.VM_HOST }}
       SERVER_PATH: /home/${{ secrets.VM_USER }}/expense-tracker
+      IMAGE_APP: ${{ secrets.DOCKER_USERNAME }}/expense-tracker
+      IMAGE_NGINX: ${{ secrets.DOCKER_USERNAME }}/expense-tracker-nginx
 
     steps:
       - name: Checkout repository
@@ -60,9 +65,8 @@ jobs:
             echo ">>> Deploying Expense Tracker..."
             cd $SERVER_PATH
 
-            # Pull latest images
-            docker pull ${{ secrets.DOCKER_USERNAME }}/expense-tracker:latest
-            docker pull ${{ secrets.DOCKER_USERNAME }}/nginx:latest
+            docker pull $IMAGE_APP:latest
+            docker pull $IMAGE_NGINX:latest
 
             docker-compose down --remove-orphans
             docker-compose up -d --build
