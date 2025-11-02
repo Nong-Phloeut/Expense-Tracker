@@ -93,8 +93,8 @@ jobs:
 
             # Pull latest images
             echo "Pulling latest images..."
-            docker pull "${IMAGE_APP}:latest"
-            docker pull "${IMAGE_NGINX}:latest"
+            docker pull ${{ secrets.DOCKER_USERNAME }}/expense-tracker:latest"
+            docker pull ${{ secrets.DOCKER_USERNAME }}/expense-tracker-nginx:latest"
 
             echo "Restarting containers..."
             docker-compose down --remove-orphans
