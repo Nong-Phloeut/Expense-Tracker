@@ -61,13 +61,14 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: 22
           script: |
-            set -e
             echo ">>> Deploying Expense Tracker..."
             cd $SERVER_PATH
 
-            docker pull $IMAGE_APP:latest
-            docker pull $IMAGE_NGINX:latest
+            echo "Pulling latest images..."
+            docker pull "${IMAGE_APP}:latest"
+            docker pull "${IMAGE_NGINX}:latest"
 
+            echo "Restarting containers..."
             docker-compose down --remove-orphans
             docker-compose up -d --build
 
