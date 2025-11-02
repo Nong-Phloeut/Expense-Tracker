@@ -37,7 +37,7 @@ python manage.py createsuperuser
 python manage.py runserver
 
 Then open the app in your browser:
-http://127.0.0.1:8080/
+http://127.0.0.1:8000/
 
 
 password super user : 123

@@ -20,4 +20,4 @@ RUN python manage.py collectstatic --noinput
 EXPOSE 8080
 
 # Run Gunicorn
-CMD ["gunicorn", "expense_tracker.wsgi:application", "--bind", "0.0.0.0:8080"]
+CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8080"]

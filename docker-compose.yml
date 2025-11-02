@@ -1,4 +1,3 @@
-version: "3.9"
 
 services:
   web:
@@ -9,7 +8,7 @@ services:
       - .env
     depends_on:
       - db
-    command: gunicorn expense_tracker.wsgi:application --bind 0.0.0.0:8080
+    command: gunicorn config.wsgi:application --bind 0.0.0.0:8080
 
   nginx:
     image: nongdev/expense-tracker-nginx:latest
