@@ -45,13 +45,39 @@ jobs:
     env:
       SERVER_USER: ${{ secrets.VM_USER }}
       SERVER_HOST: ${{ secrets.VM_HOST }}
-      SERVER_PATH: /home/${{ secrets.VM_USER }}/expense-tracker
       IMAGE_APP: ${{ secrets.DOCKER_USERNAME }}/expense-tracker
       IMAGE_NGINX: ${{ secrets.DOCKER_USERNAME }}/expense-tracker-nginx
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Cleanup old Docker
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            echo ">>> Removing old containers & images but KEEPING volumes..."
+            cd ~/expense-tracker || true
+            docker-compose down --remove-orphans || true
+            docker image prune -af || true   # only images, not volumes
+            docker container prune -f || true
+            docker network prune -f || true
+
+            rm -rf ~/expense-tracker/docker-compose.yml
+            mkdir -p ~/expense-tracker
+
+        # Copy docker-compose.yml
+      - name: Copy docker-compose.yml to server
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          source: "docker-compose.yml"
+          target: "~/expense-tracker"
 
       - name: Deploy to VM via SSH
         uses: appleboy/ssh-action@v1
@@ -62,8 +88,10 @@ jobs:
           port: 22
           script: |
             echo ">>> Deploying Expense Tracker..."
-            cd $SERVER_PATH
+            set -e
+            cd ~/expense-tracker
 
+            # Pull latest images
             echo "Pulling latest images..."
             docker pull "${IMAGE_APP}:latest"
             docker pull "${IMAGE_NGINX}:latest"
