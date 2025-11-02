@@ -9,14 +9,21 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
-                        John Doe
+                    <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                        data-bs-toggle="dropdown">
+                        {{ request.user.get_full_name|default:request.user.username }}
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                         <li><a class="dropdown-item" href="#">Profile</a></li>
                         <li><a class="dropdown-item" href="#">Settings</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="#">Logout</a></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <form method="post" action="{% url 'logout' %}" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="dropdown-item">Logout</button>
+                        </form>
+
                     </ul>
                 </li>
             </ul>
