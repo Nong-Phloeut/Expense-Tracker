@@ -1,0 +1,14 @@
+<button 
+  type="button" 
+  class="btn btn-primary d-flex align-items-center gap-2"
+  data-bs-toggle="modal" 
+  data-bs-target="{{ target|default:'#addModal' }}"
+  {% if onclick %}onclick="{{ onclick }}"{% endif %}
+>
+  {% if icon %}
+    <i class="{{ icon }}"></i>
+  {% else %}
+    <i class="fa fa-plus-circle"></i>
+  {% endif %}
+  {{ title|default:"Add New" }}
+</button>

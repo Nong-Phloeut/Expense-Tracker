@@ -3,9 +3,9 @@
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2>Recurring Expenses</h2>
-    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#recurringModal" onclick="resetForm()">
-        Add Recurring Expense
-    </button>
+    <!-- button add -->
+    {% include 'components/add_button.html' with title="Add Recurring Expense" target="#recurringModal" onclick="resetForm()" %}
+
 </div>
 
 <!-- Add/Edit Recurring Expense Modal -->
@@ -19,8 +19,8 @@
 
 <!-- Recurring Expenses Table -->
 <div class="card">
-    <div class="card-body">
-        <table class="table table-hover">
+    <div class="card-body p-0 shadow-sm">
+        <table class="table table-striped table-hover">
             <thead class="table-dark">
                 <tr>
                     <th>Name</th>

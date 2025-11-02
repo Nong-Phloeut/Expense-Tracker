@@ -4,9 +4,8 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2>Budget Planning</h2>
-    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#budgetModal" onclick="resetForm()">
-        Add Budget
-    </button>
+    <!-- button add -->
+    {% include 'components/add_button.html' with title=" Add Budget" target="#budgetModal" onclick="resetForm()" %}
 </div>
 
 <table class="table table-striped table-hover align-middle">

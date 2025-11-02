@@ -1,7 +1,7 @@
 <div class="modal fade" id="expenseModal" tabindex="-1" aria-labelledby="expenseModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
-      <form method="POST" action="">
+      <form method="POST" action="" id="expenseForm">
         {% csrf_token %}
         <input type="hidden" name="expense_id" id="expenseId">
 
@@ -45,15 +45,3 @@
     </div>
   </div>
 </div>
-
-<script>
-function openExpenseForm(id = '', date = '', categoryId = '', description = '', amount = '') {
-  document.getElementById('expenseId').value = id;
-  document.getElementById('expenseDate').value = date || '{{ today|date:"Y-m-d" }}';
-  document.getElementById('category').value = categoryId;
-  document.getElementById('description').value = description;
-  document.getElementById('amount').value = amount;
-
-  document.getElementById('expenseModalLabel').textContent = id ? 'Edit Expense' : 'Add Expense';
-}
-</script>

@@ -4,9 +4,8 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2>Expense Entry</h2>
-    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#expenseModal">
-        Add Expense
-    </button>
+    <!-- button add -->
+    {% include 'components/add_button.html' with title=" Add Expense" target="#expenseModal" onclick="resetForm()" %}
 </div>
 
 <!-- Expenses table -->
@@ -30,8 +29,10 @@
             <td>{{ expense.description }}</td>
             <td>${{ expense.amount }}</td>
             <td>
-                <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#expenseModal"
-                    onclick="openExpenseForm({{ expense.id }}, '{{ expense.date|date:'Y-m-d'}}', '{{ expense.category.id|default:'' }}', '{{ expense.description }}', '{{ expense.amount }}')">
+                <button class="btn btn-sm btn-warning edit-btn" data-bs-toggle="modal" data-bs-target="#expenseModal"
+                    data-id="{{ expense.id }}" data-category="{{ expense.category.id }}"
+                    data-amount="{{ expense.amount }}" data-description="{{ expense.description }}"
+                    data-date="{{ expense.date|date:'Y-m-d' }}">
                     Edit
                 </button>
                 <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal"
@@ -89,4 +90,28 @@
 
 <!-- ✅ Include the modal form -->
 {% include 'expense_entry/expense_form.html' %}
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // ✏️ Handle Edit Button
+        document.querySelectorAll('.edit-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                // Fill form values
+                document.getElementById('expenseId').value = this.dataset.id;
+                document.getElementById('category').value = this.dataset.category;
+                document.getElementById('amount').value = this.dataset.amount;
+                document.getElementById('description').value = this.dataset.description;
+                document.getElementById('expenseDate').value = this.dataset.date;
+                document.getElementById('expenseModalLabel').innerText = 'Edit Expense';
+            });
+        });
+    });
+
+    // ✅ Reset form for Add Expense
+    function resetForm() {
+        document.getElementById('expenseForm').reset();
+        document.getElementById('expenseId').value = '';
+        document.getElementById('expenseModalLabel').innerText = 'Add Expense';
+    }
+</script>
 {% endblock %}
