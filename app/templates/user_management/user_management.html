@@ -4,7 +4,7 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2>User Management</h2>
-    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#userModal" onclick="resetForm()">Add User</button>
+    {% include 'components/add_button.html' with title="Add User" target="#userModal" onclick="resetForm()" %}
 </div>
 
 <!-- Users table -->
@@ -27,10 +27,14 @@
             <td>{% if user.is_superuser %}Admin{% else %}User{% endif %}</td>
             <td>
                 <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#userModal"
-                    onclick="editUser({{ user.id }}, '{{ user.username|escapejs }}', '{{ user.email|escapejs }}', '{{ user.is_superuser|yesno:"Admin,User" }}')">
+                    onclick="editUser({{ user.id }}, '{{ user.username|escapejs }}', '{{ user.email|escapejs }}', '{{ user.is_superuser|yesno:"
+                    Admin,User" }}')">
                     Edit
                 </button>
-                <a href="{% url 'delete_user' user.id %}" class="btn btn-sm btn-danger">Delete</a>
+                <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal"
+                    data-url="{% url 'delete_user' user.id %}">
+                    Delete
+                </button>
             </td>
         </tr>
         {% empty %}
@@ -53,11 +57,11 @@
         {% endif %}
 
         {% for num in users.paginator.page_range %}
-            {% if users.number == num %}
-            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
-            {% else %}
-            <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
-            {% endif %}
+        {% if users.number == num %}
+        <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+        {% else %}
+        <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+        {% endif %}
         {% endfor %}
 
         {% if users.has_next %}

@@ -19,5 +19,7 @@ urlpatterns = [
     path('recurring', views.recurring_expenses, name='recurring_expenses'),
     path('recurring/delete/<int:pk>/', views.delete_recurring, name='delete_recurring_expense'),
     path('alerts', views.alerts, name='alerts'),
+    path("account/profile/", views.account_profile, name="account_profile"),
+    path("account/password/", views.account_password, name="account_password"),
 ]
     

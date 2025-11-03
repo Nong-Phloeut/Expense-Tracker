@@ -2,6 +2,8 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login as auth_login, logout
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth import update_session_auth_hash
 
 def login_view(request):
     if request.method == 'POST':
@@ -22,6 +24,33 @@ def logout_view(request):
 
 @login_required
 def profile_view(request):
-    return render(request, 'profile.html', {
+    return render(request, 'account_profile.html', {
         'user': request.user
     })
+
+
+@login_required
+def account_profile(request):
+    if request.method == "POST":
+        user = request.user
+        user.first_name = request.POST.get("first_name")
+        user.last_name = request.POST.get("last_name")
+        user.email = request.POST.get("email")
+        user.username = request.POST.get("username")
+        user.save()
+        messages.success(request, "Profile updated successfully.")
+        return redirect("account_profile")
+    return render(request, "account_profile.html")
+
+@login_required
+def account_password(request):
+    if request.method == "POST":
+        form = PasswordChangeForm(user=request.user, data=request.POST)
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)  # keep user logged in
+            messages.success(request, "Password changed successfully.")
+            return redirect("account_password")
+    else:
+        form = PasswordChangeForm(user=request.user)
+    return render(request, "account_password.html", {"form": form})
