@@ -10,10 +10,17 @@
             class="list-group-item list-group-item-action border-0 py-3 {% if request.path == '/dashboard' %}active-link{% else %}bg-dark text-white{% endif %}">
             <i class="fas fa-home fa-fw me-3"></i> Dashboard
         </a>
+        <!-- Admin-only links --> 
+        {% if user.is_superuser %}
+         <a href="{% url 'user_management' %}"
+            class="list-group-item list-group-item-action border-0 py-3 {% if request.path == '/users' %}active-link{% else %}bg-dark text-white{% endif %}">
+            <i class="fas fa-users-cog fa-fw me-3"></i> User Management
+        </a>
         <a href="{% url 'category_management' %}"
             class="list-group-item list-group-item-action border-0 py-3 {% if request.path == '/categories' %}active-link{% else %}bg-dark text-white{% endif %}">
             <i class="fas fa-tags fa-fw me-3"></i> Categories
         </a>
+        {% endif %}
         <a href="{% url 'expense_entry' %}"
             class="list-group-item list-group-item-action border-0 py-3 {% if request.path == '/expenses' %}active-link{% else %}bg-dark text-white{% endif %}">
             <i class="fas fa-plus-circle fa-fw me-3"></i> Expense Entry
@@ -26,19 +33,15 @@
             class="list-group-item list-group-item-action border-0 py-3 {% if request.path == '/recurring' %}active-link{% else %}bg-dark text-white{% endif %}">
             <i class="fas fa-redo fa-fw me-3"></i> Recurring Expenses
         </a>
+        <hr class="mx-3 my-2 text-secondary">
         <a href="{% url 'reports' %}"
             class="list-group-item list-group-item-action border-0 py-3 {% if request.path == '/reports' %}active-link{% else %}bg-dark text-white{% endif %}">
             <i class="fas fa-chart-line fa-fw me-3"></i> Reports
         </a>
-        <hr class="mx-3 my-2 text-secondary">
 
         <a href="{% url 'alerts' %}"
             class="list-group-item list-group-item-action border-0 py-3 {% if request.path == '/alerts' %}active-link{% else %}bg-dark text-white{% endif %}">
             <i class="fas fa-bell fa-fw me-3"></i> Alerts
-        </a>
-        <a href="{% url 'user_management' %}"
-            class="list-group-item list-group-item-action border-0 py-3 {% if request.path == '/users' %}active-link{% else %}bg-dark text-white{% endif %}">
-            <i class="fas fa-users-cog fa-fw me-3"></i> User Management
         </a>
     </div>
 </div>
