@@ -6,6 +6,7 @@ from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
 
 def login_view(request):
+    context = {}
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
@@ -15,6 +16,8 @@ def login_view(request):
             return redirect('dashboard')
         else:
             messages.error(request, 'Invalid username or password.')
+            context['username'] = username  # keep the username value
+            context['password'] = password  # keep the username value
     return render(request, 'login.html')
 
 def logout_view(request):

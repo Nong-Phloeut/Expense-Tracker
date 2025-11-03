@@ -28,15 +28,15 @@
 
           <div class="mb-3">
             <label class="form-label">Username</label>
-            <input type="text" name="username" class="form-control rounded-3" placeholder="Enter your username"
-              required>
+            <input type="text" name="username" class="form-control rounded-3" value="{{ username|default:'' }}"
+              placeholder="Enter your username" required>
           </div>
 
           <div class="mb-4 position-relative">
             <label class="form-label">Password</label>
             <div class="input-group">
-              <input type="password" id="password" name="password" class="form-control rounded-start-3"
-                placeholder="Enter your password" required>
+              <input type="password" id="password" name="password" value="{{ password|default:'' }}"
+                class="form-control rounded-start-3" placeholder="Enter your password" required>
               <span class="input-group-text bg-white rounded-end-3" style="cursor: pointer;" onclick="togglePassword()">
                 <i id="toggleIcon" class="fa fa-eye-slash"></i>
               </span>
