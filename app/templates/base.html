@@ -15,17 +15,20 @@
 
     {% if user.is_authenticated %}
     <!-- Authenticated layout -->
-    <div class="d-flex">
+    <div class="d-flex" style="height: 100vh; overflow: hidden;">
         {% include 'includes/_sidebar.html' %}
-        <div class="container-fluid p-0">
+
+        <div class="flex-grow-1 d-flex flex-column">
             {% include 'includes/_navbar.html' %}
             {% include 'includes/_alerts.html' %}
             {% include 'includes/_confirm.html' %}
-            <main class="main container-fluid p-4">
+
+            <main class="flex-grow-1 overflow-auto p-4">
                 {% block content %}{% endblock %}
             </main>
         </div>
     </div>
+
     {% else %}
     <!-- Public layout (Login / Signup etc.) -->
     <div class="d-flex justify-content-center align-items-center">

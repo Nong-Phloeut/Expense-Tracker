@@ -1,8 +1,8 @@
 <form id="recurringForm" method="POST" action="">
     {% csrf_token %}
-    <div class="modal-header">
+    <div class="modal-header bg-primary text-white">
         <h5 class="modal-title" id="recurringModalLabel">Add / Edit Recurring Expense</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
     </div>
     <div class="modal-body">
         <input type="hidden" name="recurring_id" id="recurring_id">

@@ -45,7 +45,7 @@
             </td>
             <td>
                 <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#alertModal"
-                    onclick="editAlert('{{ alert.id }}', '{{ alert.name }}', '{{ alert.condition }}', '{{ alert.amount }}', '{{ alert.status }}', '{{ alert.category }}')">
+                    onclick="editAlert('{{ alert.id }}', '{{ alert.name }}', '{{ alert.condition }}', '{{ alert.amount }}', '{{ alert.status }}', '{{ alert.category.id  }}')">
                     Edit
                 </button>
                 <a href="{% url 'delete_alert' alert.id %}" class="btn btn-sm btn-danger"
