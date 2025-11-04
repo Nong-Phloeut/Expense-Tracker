@@ -6,7 +6,15 @@
     <form id="alertForm" method="POST">
         {% csrf_token %}
         <input type="hidden" name="alert_id" id="alert_id">
-
+        <div class="mb-3">
+            <label class="form-label">Category</label>
+            <select class="form-select" name="category" id="category" required>
+                <option value="">-- Select Category --</option>
+                {% for cat in categories %}
+                <option value="{{ cat.id }}">{{ cat.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
         <div class="mb-3">
             <label for="alertName" class="form-label">Alert Name</label>
             <input type="text" class="form-control" id="alertName" name="alertName" required>

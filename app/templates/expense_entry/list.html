@@ -8,6 +8,27 @@
     {% include 'components/add_button.html' with title=" Add Expense" target="#expenseModal" onclick="resetForm()" %}
 </div>
 
+<!-- Toast container -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1055;">
+    {% if triggered_alerts %}
+    {% for alert_msg in triggered_alerts %}
+    <div class="toast" role="alert" aria-live="assertive"
+        aria-atomic="true">
+        <div class="toast-header">
+            <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+            <strong class="me-auto">Expense Alert</strong>
+            <small class="text-muted">Just now</small>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+            {{ alert_msg }}
+        </div>
+    </div>
+    {% endfor %}
+    {% endif %}
+</div>
+
+
 <!-- Expenses table -->
 <table class="table table-striped table-hover">
     <thead class="table-dark">
@@ -113,5 +134,13 @@
         document.getElementById('expenseId').value = '';
         document.getElementById('expenseModalLabel').innerText = 'Add Expense';
     }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const toastElList = [].slice.call(document.querySelectorAll('.toast'))
+        toastElList.map(function (toastEl) {
+            const toast = new bootstrap.Toast(toastEl, { delay: 5000 })
+            toast.show()
+        })
+    });
 </script>
 {% endblock %}

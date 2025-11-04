@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.core.paginator import Paginator
 from ..models import Expense, Category
+from app.utils.telegram_utils import check_alerts 
 
 @login_required(login_url='login')
 def expense_entry(request):
@@ -34,6 +35,13 @@ def expense_entry(request):
                 description=description,
                 date=date
             )
+                # 🔹 Check alerts for new expense
+            triggered_alerts = check_alerts(request.user, amount ,category)
+            if triggered_alerts:
+                request.session['triggered_alerts'] = triggered_alerts
+            # for alert_msg in triggered_alerts:
+            #     messages.warning(request, alert_msg)  # show in web interface
+
             messages.success(request, 'Expense added successfully!')
 
         return redirect('expense_entry')
@@ -44,11 +52,14 @@ def expense_entry(request):
     page_number = request.GET.get('page')
     expenses_page = paginator.get_page(page_number)
     categories = Category.objects.all()
+    triggered_alerts = request.session.pop('triggered_alerts', [])
 
     return render(request, 'expense_entry/list.html', {
         'expenses': expenses_page,
         'categories': categories,
         'today': timezone.now().date(),
+        'triggered_alerts': triggered_alerts
+
     })
 
 

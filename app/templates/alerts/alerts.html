@@ -4,22 +4,17 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2>Alerts</h2>
-    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#alertModal" onclick="resetForm()">Add Alert</button>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#alertModal" onclick="resetForm()">Add
+        Alert</button>
 </div>
 
-{% if messages %}
-<div>
-    {% for message in messages %}
-        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-    {% endfor %}
-</div>
-{% endif %}
 
 <table class="table table-striped table-hover">
     <thead class="table-dark">
         <tr>
             <th>#</th>
             <th>Alert Name</th>
+            <th>Category</th>
             <th>Condition</th>
             <th>Amount</th>
             <th>Status</th>
@@ -32,24 +27,29 @@
         <tr>
             <td>{{ forloop.counter }}</td>
             <td>{{ alert.name }}</td>
+            <td>
+                {% if alert.category %}
+                {{ alert.category.name }}
+                {% else %}
+                —
+                {% endif %}
+            </td>
             <td>{{ alert.condition }}</td>
             <td>${{ alert.amount }}</td>
             <td>
                 {% if alert.status == 'active' %}
-                    <span class="badge bg-success">{{ alert.status|title }}</span>
+                <span class="badge bg-success">{{ alert.status|title }}</span>
                 {% else %}
-                    <span class="badge bg-danger">{{ alert.status|title }}</span>
+                <span class="badge bg-danger">{{ alert.status|title }}</span>
                 {% endif %}
             </td>
             <td>
-                <button class="btn btn-sm btn-warning" 
-                        data-bs-toggle="modal" 
-                        data-bs-target="#alertModal"
-                        onclick="editAlert('{{ alert.id }}', '{{ alert.name }}', '{{ alert.condition }}', '{{ alert.amount }}', '{{ alert.status }}')">
+                <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#alertModal"
+                    onclick="editAlert('{{ alert.id }}', '{{ alert.name }}', '{{ alert.condition }}', '{{ alert.amount }}', '{{ alert.status }}', '{{ alert.category }}')">
                     Edit
                 </button>
                 <a href="{% url 'delete_alert' alert.id %}" class="btn btn-sm btn-danger"
-                   onclick="return confirm('Delete this alert?')">Delete</a>
+                    onclick="return confirm('Delete this alert?')">Delete</a>
             </td>
         </tr>
         {% endfor %}
@@ -71,19 +71,20 @@
 </div>
 
 <script>
-function editAlert(id, name, condition, amount, status) {
-    document.getElementById('alert_id').value = id;
-    document.getElementById('alertName').value = name;
-    document.getElementById('condition').value = condition;
-    document.getElementById('amount').value = amount;
-    document.getElementById('status').value = status;
-    document.getElementById('alertModalLabel').innerText = 'Edit Alert';
-}
+    function editAlert(id, name, condition, amount, status, categoryId) {
+        document.getElementById('alert_id').value = id;
+        document.getElementById('alertName').value = name;
+        document.getElementById('condition').value = condition;
+        document.getElementById('amount').value = amount;
+        document.getElementById('status').value = status;
+        document.getElementById('category').value = categoryId;
+        document.getElementById('alertModalLabel').innerText = 'Edit Alert';
+    }
 
-function resetForm() {
-    document.getElementById('alertForm').reset();
-    document.getElementById('alert_id').value = '';
-    document.getElementById('alertModalLabel').innerText = 'Add Alert';
-}
+    function resetForm() {
+        document.getElementById('alertForm').reset();
+        document.getElementById('alert_id').value = '';
+        document.getElementById('alertModalLabel').innerText = 'Add Alert';
+    }
 </script>
 {% endblock %}
