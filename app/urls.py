@@ -18,7 +18,8 @@ urlpatterns = [
     path('categories/delete/<int:id>/', views.delete_category, name='delete_category'),
     path('recurring', views.recurring_expenses, name='recurring_expenses'),
     path('recurring/delete/<int:pk>/', views.delete_recurring, name='delete_recurring_expense'),
-    path('alerts', views.alerts, name='alerts'),
+    path('alerts', views.alert_list, name='alerts'),
+    path('alerts/delete/<int:pk>/', views.delete_alert, name='delete_alert'),
     path("account/profile/", views.account_profile, name="account_profile"),
     path("account/password/", views.account_password, name="account_password"),
 ]
