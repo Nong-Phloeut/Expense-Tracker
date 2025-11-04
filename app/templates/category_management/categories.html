@@ -20,7 +20,7 @@
         </div>
 
         <!-- Add category button -->
-        {% include 'components/add_button.html' with title="Add Category" target="#categoryModal"%}
+        {% include 'components/add_button.html' with title="Add Category" target="#categoryModal" onclick="resetForm()" %}
     </div>
 </div>
 
@@ -39,9 +39,9 @@
             <td>{{ forloop.counter }}</td>
             <td>{{ cat.name }}</td>
             <td class="text-start">
+            
                 <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#categoryModal"
-                    data-id="{{ cat.id }}" data-name="{{ cat.name }}">
-                    <!-- <i class="fa fa-pencil-square"></i> -->
+                    onclick="editCategory('{{ cat.id }}', '{{ cat.name|default_if_none:'' }}')">
                     Edit
                 </button>
 
@@ -129,30 +129,17 @@
 
 <!-- Script to handle modal data -->
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const modal = document.getElementById("categoryModal");
-        modal.addEventListener("show.bs.modal", function (event) {
-            const button = event.relatedTarget;
-            const id = button.getAttribute("data-id");
-            const name = button.getAttribute("data-name");
-            const title = modal.querySelector(".modal-title");
-            const nameInput = modal.querySelector("#categoryName");
-            const idInput = modal.querySelector("#categoryId");
-            const form = document.querySelector("#categoryForm");
+    function editCategory(id, name) {
+        document.getElementById('categoryId').value = id;
+        document.getElementById('categoryName').value = name;
+        document.getElementById('categoryModalLabel').innerText = 'Edit Category';
+    }
 
-            if (id) {
-                // Edit mode
-                title.textContent = "Edit Category";
-                nameInput.value = name;
-                idInput.value = id;
-            } else {
-                // Add mode
-                title.textContent = "Add Category";
-                nameInput.value = "";
-                idInput.value = "";
-            }
-        });
-    });
+    function resetForm() {
+        document.getElementById('categoryForm').reset();
+        document.getElementById('categoryId').value = '';
+        document.getElementById('categoryModalLabel').innerText = 'Add Category';
+    }
 </script>
 
 {% endblock %}
