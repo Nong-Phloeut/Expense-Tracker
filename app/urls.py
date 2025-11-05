@@ -22,5 +22,6 @@ urlpatterns = [
     path('alerts/delete/<int:pk>/', views.delete_alert, name='delete_alert'),
     path("account/profile/", views.account_profile, name="account_profile"),
     path("account/password/", views.account_password, name="account_password"),
+    path('reports/export/', views.export_expenses_excel, name='export_expenses_excel'),
 ]
     

@@ -1,8 +1,4 @@
-
-# @login_required(login_url='login')
-# def reports(request):
-#     return render(request, 'reports/reports.html')
-
+import openpyxl
 from django.http import HttpResponse
 import csv
 from reportlab.pdfgen import canvas
@@ -11,6 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
 from datetime import date
 from ..models import Expense, Category
+from django.utils import timezone
 
 @login_required(login_url='login')
 def reports(request):
@@ -66,7 +63,7 @@ def reports(request):
     )
     months = [m['month'].strftime('%b %Y') for m in monthly_data]
     monthly_totals = [float(m['total']) for m in monthly_data]
-
+    print(months, monthly_totals)
     return render(request, 'reports/reports.html', {
         'expenses': expenses,
         'total_expenses': total_expenses,
@@ -84,26 +81,43 @@ def reports(request):
     })
 
 
+@login_required(login_url='login')
+def export_expenses_excel(request):
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+    category = request.GET.get('category')
 
-@login_required
-def export_report(request, format):
     expenses = Expense.objects.filter(user=request.user)
-    if format == 'excel':
-        response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename="expenses.csv"'
-        writer = csv.writer(response)
-        writer.writerow(['Date', 'Category', 'Description', 'Amount'])
-        for e in expenses:
-            writer.writerow([e.date, e.category.name, e.description, e.amount])
-        return response
-    elif format == 'pdf':
-        response = HttpResponse(content_type='application/pdf')
-        response['Content-Disposition'] = 'attachment; filename="expenses.pdf"'
-        p = canvas.Canvas(response)
-        y = 800
-        for e in expenses:
-            p.drawString(50, y, f"{e.date} - {e.category.name} - {e.amount}")
-            y -= 20
-        p.showPage()
-        p.save()
-        return response
+
+    if start_date:
+        expenses = expenses.filter(date__gte=start_date)
+    if end_date:
+        expenses = expenses.filter(date__lte=end_date)
+    if category and category != '':
+        expenses = expenses.filter(category__name=category)
+
+    # Create workbook
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Expenses"
+
+    # Header row
+    ws.append(["Date", "Category", "Description", "Amount"])
+
+    # Data rows
+    for exp in expenses:
+        ws.append([
+            exp.date.strftime("%Y-%m-%d"),
+            exp.category.name if exp.category else '',
+            exp.description,
+            float(exp.amount)
+        ])
+
+    # Response
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    filename = f"Expenses_Report_{timezone.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
+    response['Content-Disposition'] = f'attachment; filename={filename}'
+    wb.save(response)
+    return response
