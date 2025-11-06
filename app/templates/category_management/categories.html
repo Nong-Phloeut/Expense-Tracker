@@ -39,7 +39,7 @@
         <tr>
             <td>{{ forloop.counter }}</td>
             <td>{{ cat.name }}</td>
-            <td>{{ cat.description }}</td>
+            <td>{{ cat.description|default_if_none:'' }}</td>
             <td class="text-start">
             
                 <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#categoryModal"
@@ -59,45 +59,8 @@
         {% endfor %}
     </tbody>
 </table>
-<!-- <div class="card shadow-sm">
-    <div class="card-body">
-    </div>
-</div> -->
-
-<!-- Pagination -->
-{% if categories.paginator %}
-<div class="row mt-3 align-items-center">
-    <div class="col-md-6">
-        <p class="text-muted mb-0">
-            Showing {{ categories.start_index }}–{{ categories.end_index }} of {{ categories.paginator.count }}
-        </p>
-    </div>
-    <div class="col-md-6">
-        <ul class="pagination justify-content-end mb-0">
-            {% if categories.has_previous %}
-            <li class="page-item"><a class="page-link" href="?page={{ categories.previous_page_number }}">Previous</a>
-            </li>
-            {% else %}
-            <li class="page-item disabled"><span class="page-link">Previous</span></li>
-            {% endif %}
-
-            {% for num in categories.paginator.page_range %}
-            {% if num == categories.number %}
-            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
-            {% elif num > categories.number|add:'-3' and num < categories.number|add:'3' %} <li class="page-item"><a
-                    class="page-link" href="?page={{ num }}">{{ num }}</a></li>
-                {% endif %}
-                {% endfor %}
-
-                {% if categories.has_next %}
-                <li class="page-item"><a class="page-link" href="?page={{ categories.next_page_number }}">Next</a></li>
-                {% else %}
-                <li class="page-item disabled"><span class="page-link">Next</span></li>
-                {% endif %}
-        </ul>
-    </div>
-</div>
-{% endif %}
+<!-- ✅ Pagination -->
+{% include 'includes/_pagination.html' with page_obj=categories %}
 
 <!-- Modal: Add/Edit Category -->
 <div class="modal fade" id="categoryModal" tabindex="-1" aria-labelledby="categoryModalLabel" aria-hidden="true">

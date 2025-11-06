@@ -9,7 +9,7 @@ def category_management(request):
     if request.method == 'POST':
         category_id = request.POST.get('category_id')
         name = request.POST.get('name')
-        description = request.POST.get('description')
+        description = request.POST.get('description') or ''
 
         if category_id:
             # Update existing category
