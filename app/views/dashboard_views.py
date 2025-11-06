@@ -5,7 +5,7 @@ from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
 from datetime import timedelta, date
-from ..models import Expense, Category ,RecurringExpense ,Budget
+from ..models import Expense, Alert ,RecurringExpense ,Budget
 from decimal import Decimal
 
 @login_required(login_url='login')
@@ -20,7 +20,7 @@ def dashboard(request):
     budget_remaining = monthly_budget - total_expenses
 
     # Alerts (simple example — when budget exceeds 90%)
-    alert_count = 1
+    alert_count = alert_count = Alert.objects.filter().count()
     # if total_expenses > monthly_budget * 0.9 else 0
     # Recurring Expenses for current month
     recurring_monthly = RecurringExpense.objects.filter(user=request.user)
