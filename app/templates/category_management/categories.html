@@ -30,6 +30,7 @@
         <tr>
             <th>#</th>
             <th>Category Name</th>
+            <th>Description</th>
             <th class="text-start">Actions</th>
         </tr>
     </thead>
@@ -38,10 +39,11 @@
         <tr>
             <td>{{ forloop.counter }}</td>
             <td>{{ cat.name }}</td>
+            <td>{{ cat.description }}</td>
             <td class="text-start">
             
                 <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#categoryModal"
-                    onclick="editCategory('{{ cat.id }}', '{{ cat.name|default_if_none:'' }}')">
+                    onclick="editCategory('{{ cat.id }}', '{{ cat.name|default_if_none:'' }}', '{{ cat.description|default_if_none:'' }}')">
                     Edit
                 </button>
 
@@ -116,6 +118,11 @@
                         <input type="text" class="form-control" id="categoryName" name="name" required
                             placeholder="Enter category name">
                     </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label fw-semibold">Description</label>
+                        <input type="text" class="form-control" id="description" name="description"
+                            placeholder="Enter description">
+                    </div>
                 </div>
 
                 <div class="modal-footer">
@@ -129,9 +136,10 @@
 
 <!-- Script to handle modal data -->
 <script>
-    function editCategory(id, name) {
+    function editCategory(id, name, description) {
         document.getElementById('categoryId').value = id;
         document.getElementById('categoryName').value = name;
+        document.getElementById('description').value = description;
         document.getElementById('categoryModalLabel').innerText = 'Edit Category';
     }
 

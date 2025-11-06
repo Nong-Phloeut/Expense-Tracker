@@ -9,11 +9,13 @@ def category_management(request):
     if request.method == 'POST':
         category_id = request.POST.get('category_id')
         name = request.POST.get('name')
+        description = request.POST.get('description')
 
         if category_id:
             # Update existing category
             category = get_object_or_404(Category, id=category_id)
             category.name = name
+            category.description = description
             category.save()
             messages.success(request, f"Category '{name}' updated successfully!")
         else:
