@@ -1,7 +1,6 @@
 import openpyxl
 from django.http import HttpResponse
-import csv
-from reportlab.pdfgen import canvas
+from django.core.paginator import Paginator
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
@@ -17,13 +16,24 @@ def reports(request):
 
     expenses = Expense.objects.filter(user=request.user)
 
-    # Apply filters
-    if start_date:
-        expenses = expenses.filter(date__gte=start_date)
-    if end_date:
-        expenses = expenses.filter(date__lte=end_date)
+   # Default: show current month's expenses if no date range is provided
+    today = date.today()
+    if not start_date and not end_date:
+        expenses = expenses.filter(date__year=today.year, date__month=today.month)
+    else:
+        if start_date:
+            expenses = expenses.filter(date__gte=start_date)
+        if end_date:
+            expenses = expenses.filter(date__lte=end_date)
+
+    # Apply category filter
     if category_filter:
         expenses = expenses.filter(category__name=category_filter)
+
+   # Apply pagination — 10 per page
+    paginator = Paginator(expenses.order_by('-date', '-id'), 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
 
     # Summary calculations
     total_expenses = expenses.aggregate(Sum('amount'))['amount__sum'] or 0
@@ -65,7 +75,7 @@ def reports(request):
     monthly_totals = [float(m['total']) for m in monthly_data]
     print(months, monthly_totals)
     return render(request, 'reports/reports.html', {
-        'expenses': expenses,
+        'expenses': page_obj,
         'total_expenses': total_expenses,
         'highest_expense': highest_expense,
         'avg_per_day': avg_per_day,
