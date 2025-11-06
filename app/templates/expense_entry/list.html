@@ -5,15 +5,65 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2>Expense Entry</h2>
     <!-- button add -->
-    {% include 'components/add_button.html' with title=" Add Expense" target="#expenseModal" onclick="resetForm()" %}
+     <div class="d-flex align-items-center gap-2">
+        {% include 'components/filter_button.html' with target="#filterForm"  %}
+        {% include 'components/add_button.html' with title=" Add Expense" target="#expenseModal" onclick="resetForm()" %}
+     </div>
+</div>
+<div class="collapse {% if request.GET.startDate or request.GET.endDate or request.GET.categoryFilter or request.GET.min_amount or request.GET.max_amount %}show{% endif %}" id="filterForm">
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3 mb-4 align-items-end">
+                <div class="col-md-3">
+                    <label for="startDate" class="form-label">Start Date</label>
+                    <input type="date" id="startDate" name="startDate" class="form-control"
+                        value="{{ request.GET.startDate }}">
+                </div>
+    
+                <div class="col-md-3">
+                    <label for="endDate" class="form-label">End Date</label>
+                    <input type="date" id="endDate" name="endDate" class="form-control" value="{{ request.GET.endDate }}">
+                </div>
+    
+                <div class="col-md-3">
+                    <label for="category" class="form-label">Category</label>
+                    <select id="categoryFilter" name="categoryFilter" class="form-select">
+                    <option value="">All Categories</option>
+                    {% for cat in categories %}
+                        <option value="{{ cat.id }}" {% if request.GET.categoryFilter == cat.id|stringformat:"s" %}selected{% endif %}>
+                        {{ cat.name }}
+                        </option>
+                    {% endfor %}
+                    </select>
+                </div>
+    
+                <div class="col-md-3">
+                    <label for="min_amount" class="form-label">Min Amount</label>
+                    <input type="number" id="min_amount" name="min_amount" class="form-control"
+                        value="{{ request.GET.min_amount }}">
+                </div>
+    
+                <div class="col-md-3">
+                    <label for="max_amount" class="form-label">Max Amount</label>
+                    <input type="number" id="max_amount" name="max_amount" class="form-control"
+                        value="{{ request.GET.max_amount }}">
+                </div>
+    
+                <div class="col-md-3 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary w-100">Filter</button>
+                    <button type="button" class="btn btn-secondary w-100" onclick="resetFilter()">Reset</button>
+                </div>
+            </form>
+    
+        </div>
+    </div>
 </div>
 
 <!-- Toast container -->
 <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1055;">
     {% if triggered_alerts %}
     {% for alert_msg in triggered_alerts %}
-    <div class="toast bg-warning" role="alert" aria-live="assertive"
-        aria-atomic="true">
+    <div class="toast bg-warning" role="alert" aria-live="assertive" aria-atomic="true">
         <div class="toast-header">
             <i class="fas fa-exclamation-triangle text-warning me-2"></i>
             <strong class="me-auto">Expense Alert</strong>
@@ -107,5 +157,18 @@
             toast.show()
         })
     });
+
+    function resetFilter() {
+        // Clear all inputs
+        document.getElementById('startDate').value = '';
+        document.getElementById('endDate').value = '';
+        document.getElementById('category').value = '';
+        document.getElementById('min_amount').value = '';
+        document.getElementById('max_amount').value = '';
+        
+        // Reload page without query parameters
+        window.location.href = window.location.pathname;
+    }
+
 </script>
 {% endblock %}

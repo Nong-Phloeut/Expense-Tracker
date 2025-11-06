@@ -8,8 +8,11 @@ from app.utils.telegram_utils import check_alerts
 
 @login_required(login_url='login')
 def expense_entry(request):
+    """Create or update an expense and list expenses with filters and pagination."""
+    
+    # --- Handle POST (Create / Update) ---
     if request.method == 'POST':
-        expense_id = request.POST.get('expense_id')  # detect if editing
+        expense_id = request.POST.get('expense_id')
         category_id = request.POST.get('category')
         amount = request.POST.get('amount')
         description = request.POST.get('description')
@@ -18,7 +21,7 @@ def expense_entry(request):
         category = get_object_or_404(Category, id=category_id) if category_id else None
 
         if expense_id:
-            # 🔹 Update existing expense
+            # Update existing expense
             expense = get_object_or_404(Expense, id=expense_id, user=request.user)
             expense.category = category
             expense.amount = amount
@@ -27,7 +30,7 @@ def expense_entry(request):
             expense.save()
             messages.success(request, 'Expense updated successfully!')
         else:
-            # 🔹 Create new expense
+            # Create new expense
             Expense.objects.create(
                 user=request.user,
                 category=category,
@@ -35,31 +38,57 @@ def expense_entry(request):
                 description=description,
                 date=date
             )
-                # 🔹 Check alerts for new expense
-            triggered_alerts = check_alerts(request.user, amount ,category)
+            # Check alerts for new expense
+            triggered_alerts = check_alerts(request.user, amount, category)
             if triggered_alerts:
                 request.session['triggered_alerts'] = triggered_alerts
-            # for alert_msg in triggered_alerts:
-            #     messages.warning(request, alert_msg)  # show in web interface
-
             messages.success(request, 'Expense added successfully!')
 
         return redirect('expense_entry')
 
-    # 🔹 Read (List + Pagination)
+    # --- GET: List & Filter Expenses ---
     expenses = Expense.objects.filter(user=request.user).order_by('-date')
+    categories = Category.objects.all()
+
+    # --- Filters ---
+    start_date = request.GET.get('startDate')
+    end_date = request.GET.get('endDate')
+    category_id = request.GET.get('categoryFilter')
+    min_amount = request.GET.get('min_amount')
+    max_amount = request.GET.get('max_amount')
+
+    if start_date and end_date:
+        expenses = expenses.filter(date__range=[start_date, end_date])
+    elif start_date:
+        expenses = expenses.filter(date__gte=start_date)
+    elif end_date:
+        expenses = expenses.filter(date__lte=end_date)
+
+    if category_id:
+        expenses = expenses.filter(category__id=category_id)
+    if min_amount:
+        expenses = expenses.filter(amount__gte=min_amount)
+    if max_amount:
+        expenses = expenses.filter(amount__lte=max_amount)
+
+    # --- Pagination ---
     paginator = Paginator(expenses, 10)
     page_number = request.GET.get('page')
     expenses_page = paginator.get_page(page_number)
-    categories = Category.objects.all()
+
+    # --- Show filter collapse if any filter active ---
+    show_filter = any([start_date, end_date, category_id, min_amount, max_amount])
+
+    # --- Triggered alerts ---
     triggered_alerts = request.session.pop('triggered_alerts', [])
 
     return render(request, 'expense_entry/list.html', {
         'expenses': expenses_page,
         'categories': categories,
         'today': timezone.now().date(),
-        'triggered_alerts': triggered_alerts
-
+        'triggered_alerts': triggered_alerts,
+        'show_filter': show_filter,
+        'request': request
     })
 
 

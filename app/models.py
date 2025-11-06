@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-
+from django.utils import timezone
 class Category(models.Model):
     name = models.CharField(max_length=100)
     description = models.CharField(max_length=100, null=True, blank=True)
@@ -20,11 +20,28 @@ class Expense(models.Model):
         return f"{self.category} - {self.amount}"
 
 class Budget(models.Model):
+    STATUS_CHOICES = [
+        ('active', 'Active'),
+        ('completed', 'Completed'),
+        ('overdue', 'Overdue'),
+    ]
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     start_date = models.DateField()
     end_date = models.DateField()
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
+
+    def update_status(self):
+        """Auto-update the budget status based on date and spending."""
+        today = timezone.now().date()
+        if self.end_date < today:
+            self.status = 'completed'
+        elif self.start_date > today:
+            self.status = 'active'
+        else:
+            self.status = 'active'
+        self.save(update_fields=['status'])
 
 class RecurringExpense(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
