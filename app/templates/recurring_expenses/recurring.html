@@ -4,8 +4,67 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2>Recurring Expenses</h2>
     <!-- button add -->
-    {% include 'components/add_button.html' with title="Add Recurring Expense" target="#recurringModal" onclick="resetForm()" %}
+     <div class="d-flex align-items-center gap-2">
+         {% include 'components/filter_button.html' with target="#filterForm"  %}
+         {% include 'components/add_button.html' with title="Add Recurring Expense" target="#recurringModal" onclick="resetForm()" %}
+     </div>
+</div>
 
+<div class="collapse {% if request.GET.startDate or request.GET.endDate or request.GET.categoryFilter or request.GET.frequency or request.GET.min_amount or request.GET.max_amount %}show{% endif %}" id="filterForm">
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3 mb-4 align-items-end">
+
+                <div class="col-md-3">
+                    <label for="startDate" class="form-label">Start Date</label>
+                    <input type="date" id="startDate" name="startDate" class="form-control"
+                        value="{{ request.GET.startDate }}">
+                </div>
+
+                <div class="col-md-3">
+                    <label for="endDate" class="form-label">End Date</label>
+                    <input type="date" id="endDate" name="endDate" class="form-control" value="{{ request.GET.endDate }}">
+                </div>
+
+                <div class="col-md-3">
+                    <label for="categoryFilter" class="form-label">Category</label>
+                    <select id="categoryFilter" name="categoryFilter" class="form-select">
+                    <option value="">All Categories</option>
+                    {% for cat in categories %}
+                        <option value="{{ cat.id }}" {% if request.GET.categoryFilter == cat.id|stringformat:"s" %}selected{% endif %}>
+                        {{ cat.name }}
+                        </option>
+                    {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="frequency" class="form-label">Frequency</label>
+                    <select id="frequency" name="frequency" class="form-select">
+                        <option value="">All Frequencies</option>
+                        <option value="daily" {% if request.GET.frequency == 'daily' %}selected{% endif %}>Daily</option>
+                        <option value="weekly" {% if request.GET.frequency == 'weekly' %}selected{% endif %}>Weekly</option>
+                        <option value="monthly" {% if request.GET.frequency == 'monthly' %}selected{% endif %}>Monthly</option>
+                        <option value="yearly" {% if request.GET.frequency == 'yearly' %}selected{% endif %}>Yearly</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="min_amount" class="form-label">Min Amount</label>
+                    <input type="number" id="min_amount" name="min_amount" class="form-control"
+                        value="{{ request.GET.min_amount }}">
+                </div> 
+                 <div class="col-md-3">
+                    <label for="max_amount" class="form-label">Max Amount</label>
+                    <input type="number" id="max_amount" name="max_amount" class="form-control"
+                        value="{{ request.GET.max_amount }}">
+                </div>
+    
+                <div class="col-md-3 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary w-100">Filter</button>
+                    <button type="button" class="btn btn-secondary w-100" onclick="window.location.href='{% url 'recurring_expenses' %}'">Reset</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 
 <!-- Add/Edit Recurring Expense Modal -->
@@ -42,7 +101,9 @@
             <td>
                 <button class="btn btn-sm btn-warning edit-btn" data-bs-toggle="modal"
                     data-bs-target="#recurringModal" data-id="{{ expense.id }}"
-                    data-category="{{ expense.category.id }}" data-amount="{{ expense.amount }}"
+                    data-category="{{ expense.category.id }}"
+                    data-name="{{ expense.name }}"
+                    data-amount="{{ expense.amount }}"
                     data-frequency="{{ expense.frequency }}"
                     data-start_date="{{ expense.start_date|date:'Y-m-d' }}"
                     data-next_due_date="{{ expense.next_due_date|date:'Y-m-d' }}">

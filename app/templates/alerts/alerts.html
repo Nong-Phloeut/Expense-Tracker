@@ -4,7 +4,52 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2>Alerts</h2>
-    {% include 'components/add_button.html' with title="Add Alert" target="#alertModal" onclick="resetForm()" %}
+      <div class="d-flex align-items-center gap-2">
+        {% include 'components/filter_button.html' with target="#alertFilterForm"  %}
+        {% include 'components/add_button.html' with title="Add Alert" target="#alertModal" onclick="resetForm()" %}
+      </div>
+</div>
+
+<div class="collapse {% if request.GET.alertName or request.GET.categoryFilter or request.GET.status %}show{% endif %}"
+    id="alertFilterForm">
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3 mb-4 align-items-end">
+
+                <div class="col-md-3">
+                    <label for="startDate" class="form-label">Alert Name</label>
+                    <input type="text" id="alertName" name="alertName" class="form-control"
+                        value="{{ request.GET.alertName }}" placeholder="Enter alert name">
+                </div>
+
+                <div class="col-md-3">
+                    <label for="category" class="form-label">Category</label>
+                    <select id="categoryFilter" name="categoryFilter" class="form-select">
+                        <option value="">All Categories</option>
+                        {% for cat in categories %}
+                        <option value="{{ cat.id }}" {% if request.GET.categoryFilter == cat.id|stringformat:"s" %}selected{% endif %}>
+                            {{ cat.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label for="status" class="form-label">Status</label>
+                    <select id="status" name="status" class="form-select">
+                        <option value="">All Statuses</option>
+                        <option value="active" {% if request.GET.status == 'active' %}selected{% endif %}>Active</option>
+                        <option value="inactive" {% if request.GET.status == 'inactive' %}selected{% endif %}>Inactive</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary w-100">Filter</button>
+                    <button type="button" class="btn btn-secondary w-100" onclick="window.location.href='{% url 'alerts' %}'">Reset</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 
 
@@ -62,7 +107,7 @@
 
 <!-- Modal -->
 <div class="modal fade" id="alertModal" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             {% include 'alerts/_alert_form.html' %}
         </div>
