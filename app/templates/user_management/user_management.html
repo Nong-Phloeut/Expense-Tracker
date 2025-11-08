@@ -26,9 +26,15 @@
             <td>{{ user.email }}</td>
             <td>{% if user.is_superuser %}Admin{% else %}User{% endif %}</td>
             <td>
-                <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#userModal"
-                    onclick="editUser({{ user.id }}, '{{ user.username|escapejs }}', '{{ user.email|escapejs }}', '{{ user.is_superuser|yesno:"
-                    Admin,User" }}')">
+                <button 
+                    class="btn btn-sm btn-warning" 
+                    data-bs-toggle="modal" 
+                    data-bs-target="#userModal"
+                    data-user-id="{{ user.id }}"
+                    data-username="{{ user.username|escape }}"
+                    data-email="{{ user.email|escape }}"
+                    data-role="{{ user.is_superuser|yesno:'Admin,User' }}"
+                    onclick="editUserFromButton(this)">
                     Edit
                 </button>
                 <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal"

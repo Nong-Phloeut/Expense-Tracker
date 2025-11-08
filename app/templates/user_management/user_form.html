@@ -54,4 +54,13 @@ function editUser(id, username, email, role) {
     document.getElementById('role').value = role;
     document.getElementById('userModalLabel').innerText = 'Edit User';
 }
+function editUserFromButton(button) {
+  const id = button.dataset.userId;
+  const username = button.dataset.username;
+  const email = button.dataset.email;
+  const role = button.dataset.role;
+
+  editUser(id, username, email, role);
+}
+
 </script>
