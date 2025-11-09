@@ -7,6 +7,7 @@ from django.utils.crypto import get_random_string
 from django.core.mail import send_mail
 from django.conf import settings
 from django.urls import reverse
+from django.db.models import Q
 
 @login_required(login_url='login')
 def user_management(request):
@@ -60,12 +61,23 @@ def user_management(request):
             messages.success(request, f'User created successfully! Password sent to {username}')
 
         return redirect('user_management')
+    
+        # ===== Filtering =====
+    role = request.GET.get('role')
+    search = request.GET.get('search')
 
-    # Pagination
-    user_list = User.objects.all().order_by('id')
-    paginator = Paginator(user_list, 10)  # Show 10 users per page
+    users = User.objects.all().order_by('id')
+
+    if role:
+        users = users.filter(is_superuser=True if role == 'Admin' else False)
+    if search:
+        users = users.filter(Q(username__icontains=search) | Q(email__icontains=search))
+
+    # ===== Pagination =====
+    paginator = Paginator(users, 10)
     page_number = request.GET.get('page')
     users = paginator.get_page(page_number)
+
     return render(request, 'user_management/user_management.html', {'users': users})
     
 

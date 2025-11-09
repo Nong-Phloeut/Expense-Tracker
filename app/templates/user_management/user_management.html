@@ -4,7 +4,44 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2>User Management</h2>
-    {% include 'components/add_button.html' with title="Add User" target="#userModal" onclick="resetForm()" %}
+    <div class="d-flex align-items-center gap-2">
+        {% include 'components/filter_button.html' with target="#filterFormUser"  %}
+        {% include 'components/add_button.html' with title="Add User" target="#userModal" onclick="resetForm()" %}
+    </div>
+</div>
+
+<!-- 🔽 Filter Form -->
+<div class="collapse {% if request.GET.role or request.GET.search %}show{% endif %}" id="filterFormUser">
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3 mb-4 align-items-end">
+
+                <!-- Role Filter -->
+                <div class="col-md-3">
+                    <label for="role" class="form-label">Role</label>
+                    <select id="role" name="role" class="form-select">
+                        <option value="">All</option>
+                        <option value="Admin" {% if request.GET.role == 'Admin' %}selected{% endif %}>Admin</option>
+                        <option value="User" {% if request.GET.role == 'User' %}selected{% endif %}>User</option>
+                    </select>
+                </div>
+
+                <!-- Text Search Filter -->
+                <div class="col-md-4">
+                    <label for="search" class="form-label">Search (Username or Email)</label>
+                    <input type="text" id="search" name="search" class="form-control"
+                        placeholder="Enter username or email" value="{{ request.GET.search }}">
+                </div>
+
+                <!-- Buttons -->
+                <div class="col-md-3 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary w-100">Filter</button>
+                    <button type="button" class="btn btn-secondary w-100"
+                        onclick="window.location.href='{% url 'user_management' %}'">Reset</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 
 <!-- Users table -->

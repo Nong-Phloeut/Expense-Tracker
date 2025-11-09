@@ -7,6 +7,8 @@ from django.db.models import Sum
 from datetime import date
 from ..models import Expense, Category
 from django.utils import timezone
+from openpyxl.styles import Font, Alignment, PatternFill, Border, Side, NamedStyle
+from openpyxl.utils import get_column_letter
 
 @login_required(login_url='login')
 def reports(request):
@@ -90,7 +92,6 @@ def reports(request):
         'category_filter': category_filter or '',
     })
 
-
 @login_required(login_url='login')
 def export_expenses_excel(request):
     start_date = request.GET.get('start_date')
@@ -106,15 +107,56 @@ def export_expenses_excel(request):
     if category and category != '':
         expenses = expenses.filter(category__name=category)
 
-    # Create workbook
+    # Create workbook and sheet
     wb = openpyxl.Workbook()
     ws = wb.active
-    ws.title = "Expenses"
+    ws.title = "Expenses Report"
 
-    # Header row
-    ws.append(["Date", "Category", "Description", "Amount"])
+    # === Styles ===
+    header_font = Font(bold=True, color="FFFFFF")
+    header_fill = PatternFill(start_color="4F81BD", end_color="4F81BD", fill_type="solid")
+    center_alignment = Alignment(horizontal="center", vertical="center")
+    left_alignment = Alignment(horizontal="left", vertical="center")
+    border_style = Side(border_style="thin", color="CCCCCC")
+    border = Border(left=border_style, right=border_style, top=border_style, bottom=border_style)
 
-    # Data rows
+    # === Report Title ===
+    title = "Expenses Report"
+    ws.merge_cells("A1:D1")
+    title_cell = ws["A1"]
+    title_cell.value = title
+    title_cell.font = Font(size=14, bold=True)
+    title_cell.alignment = center_alignment
+
+    # === Metadata (merged cells for better layout) ===
+    ws.merge_cells("A2:D2")
+    ws["A2"].value = f"Generated on: {timezone.now().strftime('%Y-%m-%d %H:%M:%S')}"
+    ws["A2"].alignment = left_alignment
+
+    ws.merge_cells("A3:D3")
+    ws["A3"].value = f"User: {request.user.username}"
+    ws["A3"].alignment = left_alignment
+
+    ws.merge_cells("A4:D4")
+    ws["A4"].value = f"Filters → Date: {start_date or 'All'} to {end_date or 'All'}"
+    ws["A4"].alignment = left_alignment
+
+    # === Blank row before header ===
+    ws.append([])
+
+    # === Header Row ===
+    headers = ["Date", "Category", "Description", "Amount (USD)"]
+    ws.append(headers)
+    header_row = ws[6]  # after title & metadata
+
+    for cell in header_row:
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = center_alignment
+        cell.border = border
+
+    # === Data Rows ===
+    total_amount = 0
     for exp in expenses:
         ws.append([
             exp.date.strftime("%Y-%m-%d"),
@@ -122,8 +164,32 @@ def export_expenses_excel(request):
             exp.description,
             float(exp.amount)
         ])
+        total_amount += float(exp.amount)
 
-    # Response
+    # === Total Row ===
+    total_row = ws.max_row + 1
+    ws[f"C{total_row}"] = "Total:"
+    ws[f"C{total_row}"].font = Font(bold=True)
+    ws[f"D{total_row}"] = total_amount
+    ws[f"D{total_row}"].number_format = '"$"#,##0.00'
+
+    # === Styling all data cells ===
+    for row in ws.iter_rows(min_row=7, max_row=ws.max_row, min_col=1, max_col=4):
+        for cell in row:
+            cell.border = border
+            if cell.column == 1:
+                cell.alignment = center_alignment
+            elif cell.column == 4:
+                cell.number_format = '"$"#,##0.00'
+                cell.alignment = Alignment(horizontal="right")
+
+    # === Auto-adjust column widths ===
+    for col in ws.iter_cols(min_row=6, max_row=ws.max_row, min_col=1, max_col=4):
+        max_length = max(len(str(cell.value)) if cell.value else 0 for cell in col)
+        ws.column_dimensions[get_column_letter(col[0].column)].width = max_length + 4
+
+
+    # === Response ===
     response = HttpResponse(
         content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     )
