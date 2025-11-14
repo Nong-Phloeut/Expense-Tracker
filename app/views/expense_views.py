@@ -5,6 +5,7 @@ from django.utils import timezone
 from django.core.paginator import Paginator
 from ..models import Expense, Category
 from app.utils.telegram_utils import check_alerts 
+from app.utils.activity_log import log_activity 
 
 @login_required(login_url='login')
 def expense_entry(request):
@@ -28,15 +29,29 @@ def expense_entry(request):
             expense.description = description
             expense.date = date
             expense.save()
+            log_activity(
+                request,
+                action="UPDATE",
+                model_name="Expense",
+                object_id=expense.id,
+                description=f"Update expense amount'{expense.amount}'"
+            )
             messages.success(request, 'Expense updated successfully!')
         else:
             # Create new expense
-            Expense.objects.create(
+            expense = Expense.objects.create(
                 user=request.user,
                 category=category,
                 amount=amount,
                 description=description,
                 date=date
+            )
+            log_activity(
+                request,
+                action="CREATE",
+                model_name="Expense",
+                object_id=expense.id,
+                description=f"Create expense amount'{expense.amount}'"
             )
             # Check alerts for new expense
             triggered_alerts = check_alerts(request.user, amount, category)
@@ -95,6 +110,13 @@ def expense_entry(request):
 @login_required(login_url='login')
 def delete_expense(request, id):
     expense = get_object_or_404(Expense, id=id, user=request.user)
+    log_activity(
+        request,
+        action="DELETE",
+        model_name="Expense",
+        object_id=expense.id,
+        description=f"Delete expense amount'{expense.amount}'"
+    )
     expense.delete()
     messages.success(request, 'Expense deleted successfully!')
     return redirect('expense_entry')

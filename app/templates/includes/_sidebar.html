@@ -43,5 +43,15 @@
             class="list-group-item list-group-item-action border-0 py-3 {% if request.path == '/alerts' %}active-link{% else %}bg-dark text-white{% endif %}">
             <i class="fas fa-bell fa-fw me-3"></i> Alerts
         </a>
+        <hr class="mx-3 my-2 text-secondary">
+        <a href="{% url 'activity_log' %}"
+            class="list-group-item list-group-item-action border-0 py-3 {% if request.path == '/activity_log' %}active-link{% else %}bg-dark text-white{% endif %}">
+            <i class="fas fa-solid fa-clock-rotate-left me-3"></i> Audit Logs
+        </a>
+
+        <!-- <a href="{% url 'alerts' %}"
+            class="list-group-item list-group-item-action border-0 py-3 {% if request.path == '/alerts' %}active-link{% else %}bg-dark text-white{% endif %}">
+            <i class="fas fa-bell fa-fw me-3"></i> Alerts
+        </a> -->
     </div>
 </div>

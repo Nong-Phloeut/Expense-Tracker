@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from ..models import Category
 from django.core.paginator import Paginator
+from app.utils.activity_log import log_activity 
 
 @login_required(login_url='login')
 def category_management(request):
@@ -17,10 +18,27 @@ def category_management(request):
             category.name = name
             category.description = description
             category.save()
+            log_activity(
+                request,
+                action="UPDATE",
+                model_name="Category",
+                object_id=category.id,
+                description=f"Update category name'{category.name}'"
+            )
             messages.success(request, f"Category '{name}' updated successfully!")
         else:
             # Create new category
-            Category.objects.create(name=name)
+            category = Category.objects.create(
+                name=name,
+                description=description
+            )
+            log_activity(
+                request,
+                action="CREATE",
+                model_name="Category",
+                object_id=category.id,
+                description=f"Create category name'{category.name}'"
+            )
             messages.success(request, f"Category '{name}' added successfully!")
 
 
@@ -36,6 +54,13 @@ def category_management(request):
 @login_required(login_url='login')
 def delete_category(request, id):
     category = get_object_or_404(Category, id=id)
+    log_activity(
+        request,
+        action="DELETE",
+        model_name="Category",
+        object_id=category.id,
+        description=f"Delete ca category '{category.name}'"
+    )
     category.delete()
     messages.success(request, f'Category "{category.name}" deleted successfully.')
     return redirect('category_management')

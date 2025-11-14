@@ -10,7 +10,7 @@
       </div>
 </div>
 
-<div class="collapse {% if request.GET.alertName or request.GET.categoryFilter or request.GET.status %}show{% endif %}"
+<div class="collapse {% if request.GET.alertNameFitler or request.GET.categoryFilter or request.GET.status %}show{% endif %}"
     id="alertFilterForm">
     <div class="card mb-4">
         <div class="card-body">
@@ -18,8 +18,8 @@
 
                 <div class="col-md-3">
                     <label for="startDate" class="form-label">Alert Name</label>
-                    <input type="text" id="alertName" name="alertName" class="form-control"
-                        value="{{ request.GET.alertName }}" placeholder="Enter alert name">
+                    <input type="text" id="alertNameFitler" name="alertNameFitler" class="form-control"
+                        value="{{ request.GET.alertNameFitler }}" placeholder="Enter alert name">
                 </div>
 
                 <div class="col-md-3">
@@ -92,8 +92,10 @@
                     onclick="editAlert('{{ alert.id }}', '{{ alert.name }}', '{{ alert.condition }}', '{{ alert.amount }}', '{{ alert.status }}', '{{ alert.category.id  }}')">
                     Edit
                 </button>
-                <a href="{% url 'delete_alert' alert.id %}" class="btn btn-sm btn-danger"
-                    onclick="return confirm('Delete this alert?')">Delete</a>
+                 <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal"
+                    data-url="{% url 'delete_alert' alert.id %}">
+                    Delete
+                </button>
             </td>
         </tr>
         {% endfor %}

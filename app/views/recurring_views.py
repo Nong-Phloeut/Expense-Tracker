@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from ..models import RecurringExpense, Category
 from django.utils import timezone
-
+from app.utils.activity_log import log_activity 
 
 @login_required(login_url='login')
 def recurring_expenses(request):
@@ -64,9 +64,16 @@ def recurring_expenses(request):
             expense.start_date = start_date
             expense.next_due_date = next_due_date
             expense.save()
+            log_activity(
+                request,
+                action="UPDATE",
+                model_name="Expense Recurring",
+                object_id=expense.id,
+                description=f"Update expense name'{expense.name}'"
+            )
             messages.success(request, "Recurring expense updated successfully!")
         else:
-            RecurringExpense.objects.create(
+            expense = RecurringExpense.objects.create(
                 user=request.user,
                 category=category,
                 amount=amount,
@@ -74,6 +81,13 @@ def recurring_expenses(request):
                 frequency=frequency,
                 start_date=start_date,
                 next_due_date=next_due_date,
+            )
+            log_activity(
+                request,
+                action="CREATE",
+                model_name="Expense Recurring",
+                object_id=expense.id,
+                description=f"Create expense name'{expense.name}'"
             )
             messages.success(request, "Recurring expense added successfully!")
 
@@ -89,6 +103,13 @@ def recurring_expenses(request):
 def delete_recurring(request, pk):
     """Delete a recurring expense"""
     expense = get_object_or_404(RecurringExpense, pk=pk, user=request.user)
+    log_activity(
+        request,
+        action="DELETE",
+        model_name="Expense Recurring",
+        object_id=expense.id,
+        description=f"Delete expense name'{expense.name}'"
+    )
     expense.delete()
     messages.success(request, "Recurring expense deleted successfully!")
     return redirect('recurring_expenses')

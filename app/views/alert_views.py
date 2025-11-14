@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from ..models import Alert ,Category
+from app.utils.activity_log import log_activity 
 from django.core.paginator import Paginator
 
 @login_required(login_url='login')
@@ -12,7 +13,7 @@ def alert_list(request):
     alerts = Alert.objects.filter(user=request.user).order_by('-created_at')
 
     # Get filters from GET parameters
-    alert_name = request.GET.get('alertName')
+    alert_name = request.GET.get('alertNameFitler')
     category_filter = request.GET.get('categoryFilter')
     status_filter = request.GET.get('status')
 
@@ -47,16 +48,30 @@ def alert_list(request):
             alert.amount = amount
             alert.status = status
             alert.category = category
+            log_activity(
+                request,
+                action="UPDATE",
+                model_name="Alert",
+                object_id=alert.id,
+                description=f"Update alert titled '{alert.name}'"
+            )
             alert.save()
             messages.success(request, "Alert updated successfully.")
         else:
-            Alert.objects.create(
+            alert = Alert.objects.create(
                 user=request.user,
                 name=name,
                 condition=condition,
                 amount=amount,
                 status=status,
                 category=category
+            )
+            log_activity(
+                request,
+                action="CREATE",
+                model_name="Alert",
+                object_id=alert.id,
+                description=f"Create alert titled '{alert.name}'"
             )
             messages.success(request, "Alert created successfully.")
 
@@ -70,6 +85,14 @@ def alert_list(request):
 @login_required(login_url='login')
 def delete_alert(request, pk):
     alert = get_object_or_404(Alert, pk=pk, user=request.user)
+     # Log the delete action BEFORE deletion if you want to capture details
+    log_activity(
+        request,
+        action="DELETE",
+        model_name="Alert",
+        object_id=alert.id,
+        description=f"Deleted alert titled '{alert.name}'"
+    )
     alert.delete()
     messages.success(request, "Alert deleted successfully.")
     return redirect('alerts')

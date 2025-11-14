@@ -5,6 +5,7 @@ from ..models import Budget, Category
 from django.core.paginator import Paginator
 from django.utils import timezone
 from datetime import datetime
+from app.utils.activity_log import log_activity 
 
 @login_required(login_url='login')
 def budget_management(request):
@@ -35,6 +36,13 @@ def budget_management(request):
             budget.start_date = start_date
             budget.end_date = end_date
             budget.update_status()
+            log_activity(
+                request,
+                action="UPDATE",
+                model_name="Budget",
+                object_id=budget.id,
+                description=f"Update budget titled '{budget.amount}'"
+            )
             budget.save()
             messages.success(request, "Budget updated successfully.")
         else:
@@ -45,6 +53,13 @@ def budget_management(request):
                 amount=amount,
                 start_date=start_date,
                 end_date=end_date
+            )
+            log_activity(
+                request,
+                action="CREATE",
+                model_name="Budget",
+                object_id=budget.id,
+                description=f"Update budget titled '{budget.amount}'"
             )
             budget.update_status()
             messages.success(request, "Budget created successfully.")
@@ -91,6 +106,13 @@ def budget_management(request):
 @login_required(login_url='login')
 def budget_delete(request, id):
     budget = get_object_or_404(Budget, id=id, user=request.user)
+    log_activity(
+            request,
+            action="DELETE",
+            model_name="Budget",
+            object_id=budget.id,
+            description=f"Delete budget titled '{budget.amount}'"
+        )
     budget.delete()
     messages.success(request, "Budget deleted successfully.")
     return redirect('budget_management')

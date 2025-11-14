@@ -8,6 +8,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.urls import reverse
 from django.db.models import Q
+from app.utils.activity_log import log_activity 
 
 @login_required(login_url='login')
 def user_management(request):
@@ -24,12 +25,26 @@ def user_management(request):
             user.email = email
             user.is_superuser = True if role == 'Admin' else False
             user.save()
+            log_activity(
+                request,
+                action="UPDATE",
+                model_name="User",
+                object_id=user.id,
+                description=f"Update username'{user.username}'"
+            )
             messages.success(request, 'User updated successfully!')
         else:
             # Create new user
             random_password = get_random_string(12)  # 12-char secure password
             is_superuser = True if role == 'Admin' else False
-            User.objects.create_user(username=username, email=email, password=random_password, is_superuser=is_superuser)
+            user = User.objects.create_user(username=username, email=email, password=random_password, is_superuser=is_superuser)
+            log_activity(
+                request,
+                action="CREATE",
+                model_name="User",
+                object_id=user.id,
+                description=f"Update username'{user.username}'"
+            )
             # Send password to user via email
             # Generate absolute login link
             login_url = request.build_absolute_uri(reverse('login'))
@@ -85,8 +100,15 @@ def user_management(request):
 def delete_user(request, user_id):
     user = get_object_or_404(User, id=user_id)
     if user != request.user:
+        log_activity(
+            request,
+            action="DELETE",
+            model_name="User",
+            object_id=user.id,
+            description=f"Delete user username'{user.username}'"
+        )
         user.delete()
         messages.success(request, 'User deleted successfully!')
     else:
-        messages.error(request, 'You cannot delete yourself!')
+        messages.warning(request, 'You cannot delete yourself!')
     return redirect('user_management')

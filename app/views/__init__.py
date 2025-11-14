@@ -7,3 +7,4 @@ from .recurring_views import *
 from .alert_views import *
 from .report_views import *
 from .user_views import *
+from .activity_log import *

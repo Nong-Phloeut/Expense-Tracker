@@ -23,5 +23,6 @@ urlpatterns = [
     path("account/profile/", views.account_profile, name="account_profile"),
     path("account/password/", views.account_password, name="account_password"),
     path('reports/export/', views.export_expenses_excel, name='export_expenses_excel'),
+    path('activity_log', views.activity_log_list, name='activity_log'),
 ]
     
