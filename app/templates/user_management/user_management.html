@@ -11,7 +11,7 @@
 </div>
 
 <!-- 🔽 Filter Form -->
-<div class="collapse {% if request.GET.role or request.GET.search %}show{% endif %}" id="filterFormUser">
+<div class="collapse {% if request.GET.roleFilter or request.GET.search %}show{% endif %}" id="filterFormUser">
     <div class="card mb-4">
         <div class="card-body">
             <form method="get" class="row g-3 mb-4 align-items-end">
@@ -19,10 +19,10 @@
                 <!-- Role Filter -->
                 <div class="col-md-3">
                     <label for="role" class="form-label">Role</label>
-                    <select id="role" name="role" class="form-select">
+                    <select id="roleFilter" name="role" class="form-select">
                         <option value="">All</option>
-                        <option value="Admin" {% if request.GET.role == 'Admin' %}selected{% endif %}>Admin</option>
-                        <option value="User" {% if request.GET.role == 'User' %}selected{% endif %}>User</option>
+                        <option value="Admin" {% if request.GET.roleFilter == 'Admin' %}selected{% endif %}>Admin</option>
+                        <option value="User" {% if request.GET.roleFilter == 'User' %}selected{% endif %}>User</option>
                     </select>
                 </div>
 

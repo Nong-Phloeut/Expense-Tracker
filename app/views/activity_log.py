@@ -3,6 +3,9 @@ from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required, permission_required
 from django.shortcuts import render
 from ..models import ActivityLog
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from app.utils.activity_log import log_activity 
 
 @login_required(login_url='login')
 # @permission_re quired('logs.view_activitylog', raise_exception=True)
@@ -22,3 +25,21 @@ def activity_log_list(request):
         'page_obj': page_obj,
     }
     return render(request, 'logs/activity_log_list.html', context)
+
+
+@login_required
+def delete_log(request, pk):
+    log = get_object_or_404(ActivityLog, pk=pk)
+    log.delete()
+
+    # Meta-log: record deletion
+    log_activity(
+        request,
+        action="DELETE",
+        model_name="ActivityLog",
+        object_id=pk,
+        description=f"Deleted audit log entry #{pk}"
+    )
+
+    messages.success(request, "Audit log entry deleted successfully.")
+    return redirect('activity_log')

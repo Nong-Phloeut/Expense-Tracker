@@ -78,7 +78,7 @@ def user_management(request):
         return redirect('user_management')
     
         # ===== Filtering =====
-    role = request.GET.get('role')
+    role = request.GET.get('roleFilter')
     search = request.GET.get('search')
 
     users = User.objects.all().order_by('id')
