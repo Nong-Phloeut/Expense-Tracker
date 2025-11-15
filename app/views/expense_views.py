@@ -6,6 +6,7 @@ from django.core.paginator import Paginator
 from ..models import Expense, Category
 from app.utils.telegram_utils import check_alerts 
 from app.utils.activity_log import log_activity 
+from django.urls import reverse
 
 @login_required(login_url='login')
 def expense_entry(request):
@@ -119,4 +120,6 @@ def delete_expense(request, id):
     )
     expense.delete()
     messages.success(request, 'Expense deleted successfully!')
-    return redirect('expense_entry')
+    querystring = request.GET.urlencode()
+    return redirect(f"{reverse('expense_entry')}?{querystring}")
+    # return redirect('expense_entry')

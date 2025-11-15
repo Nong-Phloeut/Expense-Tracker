@@ -118,7 +118,7 @@
                     Edit
                 </button>
                 <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal"
-                    data-url="{% url 'budget_delete' budget.id %}">
+                    data-url="{% url 'budget_delete' budget.id %}?{{ request.GET.urlencode }}">
                     Delete
                 </button>
             </td>
@@ -133,43 +133,9 @@
 </table>
 
 <!-- Pagination -->
-{% if budgets.paginator %}
-<div class="row mt-4">
-    <div class="col-md-6">
-        <p class="text-muted mb-0">
-            Showing {{ budgets.start_index }} to {{ budgets.end_index }} of
-            {{ budgets.paginator.count }} budgets
-        </p>
-    </div>
-    <div class="col-md-6">
-        <nav aria-label="Pagination">
-            <ul class="pagination justify-content-end">
-                {% if budgets.has_previous %}
-                <li class="page-item"><a class="page-link" href="?page={{ budgets.previous_page_number }}">Previous</a>
-                </li>
-                {% else %}
-                <li class="page-item disabled"><span class="page-link">Previous</span></li>
-                {% endif %}
+ <!-- ✅ Pagination -->
+{% include 'includes/_pagination.html' with page_obj=budgets %}
 
-                {% for num in budgets.paginator.page_range %}
-                {% if budgets.number == num %}
-                <li class="page-item active"><span class="page-link">{{ num }}</span></li>
-                {% else %}
-                <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
-                {% endif %}
-                {% endfor %}
-
-                {% if budgets.has_next %}
-                <li class="page-item"><a class="page-link" href="?page={{ budgets.next_page_number }}">Next</a></li>
-                {% else %}
-                <li class="page-item disabled"><span class="page-link">Next</span></li>
-                {% endif %}
-            </ul>
-        </nav>
-    </div>
-</div>
-
-{% endif %}
 
 <!-- Modal -->
 <div class="modal fade" id="budgetModal" tabindex="-1" aria-labelledby="budgetModalLabel" aria-hidden="true">

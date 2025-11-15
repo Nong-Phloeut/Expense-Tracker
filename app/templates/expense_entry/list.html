@@ -107,7 +107,7 @@
                     Edit
                 </button>
                 <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal"
-                    data-url="{% url 'delete_expense' expense.id %}">
+                    data-url="{% url 'delete_expense' expense.id %}?{{ request.GET.urlencode }}">
                     Delete
                 </button>
             </td>

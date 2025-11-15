@@ -6,6 +6,7 @@ from django.core.paginator import Paginator
 from django.utils import timezone
 from datetime import datetime
 from app.utils.activity_log import log_activity 
+from django.urls import reverse
 
 @login_required(login_url='login')
 def budget_management(request):
@@ -96,10 +97,16 @@ def budget_management(request):
     paginator = Paginator(budgets, 10)
     page_obj = paginator.get_page(request.GET.get('page'))
 
+    filters = request.GET.copy()
+    # Remove page param so you don't duplicate it
+    if 'page' in filters:
+        filters.pop('page')
+
     return render(request, 'budget_planning/budget_management.html', {
         'budgets': page_obj,
         'categories': categories,
         'request': request,
+        'filters': filters.urlencode(),
     })
 
 
@@ -115,4 +122,6 @@ def budget_delete(request, id):
         )
     budget.delete()
     messages.success(request, "Budget deleted successfully.")
-    return redirect('budget_management')
+    querystring = request.GET.urlencode()
+    return redirect(f"{reverse('budget_management')}?{querystring}")
+    # return redirect('budget_management')
