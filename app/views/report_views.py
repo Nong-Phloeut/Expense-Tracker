@@ -75,7 +75,12 @@ def reports(request):
     )
     months = [m['month'].strftime('%b %Y') for m in monthly_data]
     monthly_totals = [float(m['total']) for m in monthly_data]
-    print(months, monthly_totals)
+
+    filters = request.GET.copy()
+    # Remove page param so you don't duplicate it
+    if 'page' in filters:
+        filters.pop('page')
+
     return render(request, 'reports/reports.html', {
         'expenses': page_obj,
         'total_expenses': total_expenses,
@@ -90,6 +95,7 @@ def reports(request):
         'start_date': start_date or '',
         'end_date': end_date or '',
         'category_filter': category_filter or '',
+        'filters': filters.urlencode(),
     })
 
 @login_required(login_url='login')
