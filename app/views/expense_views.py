@@ -98,13 +98,19 @@ def expense_entry(request):
     # --- Triggered alerts ---
     triggered_alerts = request.session.pop('triggered_alerts', [])
 
+    filters = request.GET.copy()
+    # Remove page param so you don't duplicate it
+    if 'page' in filters:
+        filters.pop('page')
+
     return render(request, 'expense_entry/list.html', {
         'expenses': expenses_page,
         'categories': categories,
         'today': timezone.now().date(),
         'triggered_alerts': triggered_alerts,
         'show_filter': show_filter,
-        'request': request
+        'request': request,
+        'filters': filters.urlencode(),
     })
 
 
