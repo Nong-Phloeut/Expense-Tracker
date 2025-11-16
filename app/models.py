@@ -120,3 +120,25 @@ class ActivityLog(models.Model):
 
     def __str__(self):
         return f"{self.user} - {self.action} - {self.created_at}"
+
+
+class Method(models.Model):
+    name = models.CharField(max_length=100)
+    code = models.CharField(max_length=100, unique=True)
+    is_open = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.name
+
+
+class Role(models.Model):
+    name = models.CharField(max_length=50)
+    description = models.TextField(blank=True, null=True)
+    methods = models.ManyToManyField(Method, blank=True)
+    
+    @property
+    def permissions(self):
+        return self.methods.all()
+    
+    def __str__(self):
+        return self.name

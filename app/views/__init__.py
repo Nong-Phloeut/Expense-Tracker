@@ -8,3 +8,4 @@ from .alert_views import *
 from .report_views import *
 from .user_views import *
 from .activity_log import *
+from .role_view import *
