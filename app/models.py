@@ -70,28 +70,12 @@ class Alert(models.Model):
     def __str__(self):
         return self.name
     
-# class CustomUser(AbstractUser):
-#     role = models.ForeignKey('Role', on_delete=models.SET_NULL, null=True, blank=True)
-#     last_login_ip = models.GenericIPAddressField(null=True, blank=True)
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    chart_id = models.CharField(max_length=20, null=True, blank=True)
 
-#     # Fix reverse accessor clashes
-#     groups = models.ManyToManyField(
-#         Group,
-#         related_name='customuser_set',  # changed from default
-#         blank=True,
-#         help_text='The groups this user belongs to.',
-#         verbose_name='groups',
-#     )
-#     user_permissions = models.ManyToManyField(
-#         Permission,
-#         related_name='customuser_set',  # changed from default
-#         blank=True,
-#         help_text='Specific permissions for this user.',
-#         verbose_name='user permissions',
-#     )
-
-#     def __str__(self):
-#         return self.username
+    def __str__(self):
+        return self.user.username
 
 class ActivityLog(models.Model):
     ACTION_CHOICES = [

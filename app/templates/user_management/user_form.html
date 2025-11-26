@@ -3,7 +3,8 @@
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title" id="userModalLabel">Add / Edit User</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <form id="userForm" method="POST" action="">
@@ -13,21 +14,27 @@
                     <div class="mb-3">
                         <label for="username" class="form-label">Username</label>
                         <input type="text" class="form-control" name="username" id="username"
-                               placeholder="Enter username" required>
+                            placeholder="Enter username" required>
                     </div>
 
                     <div class="mb-3">
                         <label for="email" class="form-label">Email</label>
-                        <input type="email" class="form-control" name="email" id="email"
-                               placeholder="Enter email" required>
+                        <input type="email" class="form-control" name="email" id="email" placeholder="Enter email"
+                            required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="chartId" class="form-label">Telegram chart ID</label>
+                        <input type="text" class="form-control" name="chartId" id="chartId"
+                            placeholder="Enter Telegram chart ID">
                     </div>
 
                     <div class="mb-3">
                         <label for="role" class="form-label">Role</label>
                         <select class="form-select" name="role" id="role" required>
                             <option value="">Select Role</option>
-                            <option value="Admin">Admin</option>
-                            <option value="User">User</option>
+                            {% for r in roles %}
+                            <option value="{{ r.id }}">{{ r.name }}</option>
+                            {% endfor %}
                         </select>
                     </div>
                 </form>
@@ -41,26 +48,30 @@
 </div>
 
 <script>
-function resetForm() {
-    document.getElementById('userForm').reset();
-    document.getElementById('user_id').value = '';
-    document.getElementById('userModalLabel').innerText = 'Add User';
-}
+    function resetForm() {
+        document.getElementById('userForm').reset();
+        document.getElementById('user_id').value = '';
+        document.getElementById('userModalLabel').innerText = 'Add User';
+    }
 
-function editUser(id, username, email, role) {
-    document.getElementById('user_id').value = id;
-    document.getElementById('username').value = username;
-    document.getElementById('email').value = email;
-    document.getElementById('role').value = role;
-    document.getElementById('userModalLabel').innerText = 'Edit User';
-}
-function editUserFromButton(button) {
-  const id = button.dataset.userId;
-  const username = button.dataset.username;
-  const email = button.dataset.email;
-  const role = button.dataset.role;
+    function editUser(id, username, email, role, chartId) {
+        document.getElementById('user_id').value = id;
+        document.getElementById('username').value = username;
+        document.getElementById('email').value = email;
+        document.getElementById('role').value = role;
+        document.getElementById('chartId').value = chartId;
+        document.getElementById('userModalLabel').innerText = 'Edit User';
+    }
 
-  editUser(id, username, email, role);
-}
+    function editUserFromButton(button) {
+        const id = button.dataset.userId;
+        const username = button.dataset.username;
+        const email = button.dataset.email;
+        const role = button.dataset.role;
+        const chartId = button.dataset.chartId; // <<< Add this
+
+        editUser(id, username, email, role, chartId);
+    }
+
 
 </script>

@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User ,Group
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.utils.crypto import get_random_string
@@ -9,6 +9,10 @@ from django.conf import settings
 from django.urls import reverse
 from django.db.models import Q
 from app.utils.activity_log import log_activity 
+from app.models import UserProfile
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError
+from smtplib import SMTPException
 
 @login_required(login_url='login')
 def user_management(request):
@@ -17,14 +21,22 @@ def user_management(request):
         username = request.POST.get('username')
         email = request.POST.get('email')
         role = request.POST.get('role')
-
+        chart_id = request.POST.get('chartId')
         if user_id:
+            group = get_object_or_404(Group, id=role)  # role is group ID from the form
             # Update existing user
             user = get_object_or_404(User, id=user_id)
             user.username = username
             user.email = email
-            user.is_superuser = True if role == 'Admin' else False
+            # user.is_superuser = True if role == 'Admin' else False
+            user.groups.clear()       # remove old roles
+            user.groups.add(group)    # assign new role
+
             user.save()
+       
+            profile, _ = UserProfile.objects.get_or_create(user=user)
+            profile.chart_id = chart_id
+            profile.save()
             log_activity(
                 request,
                 action="UPDATE",
@@ -38,6 +50,11 @@ def user_management(request):
             random_password = get_random_string(12)  # 12-char secure password
             is_superuser = True if role == 'Admin' else False
             user = User.objects.create_user(username=username, email=email, password=random_password, is_superuser=is_superuser)
+         
+            profile, _ = UserProfile.objects.get_or_create(user=user)
+            profile.chart_id = chart_id
+            user.groups.add(group)
+            profile.save()
             log_activity(
                 request,
                 action="CREATE",
@@ -50,30 +67,43 @@ def user_management(request):
             login_url = request.build_absolute_uri(reverse('login'))
 
             # Email content
-            subject = "Welcome to Expense Tracker System"
-            message = f"""
-                Hello {username},
+                    
+            try:
+                # Validate email format first
+                validate_email(email)
 
-                Your account has been created on Expense Tracker System.
+                # Build login URL
+                login_url = request.build_absolute_uri(reverse('login'))
 
-                🔹 **Username:** {username}
-                🔹 **Password:** {random_password}
+                # Email content
+                subject = "Welcome to Expense Tracker System"
+                message = f"""
+                    Hello {username},
 
-                Please click the link below to access the system and change your password immediately:
-                {login_url}
+                    Your account has been created on Expense Tracker System.
 
-                Best regards,
-                Expense Tracker System Team
-            """
-            send_mail(
-                subject,
-                message,
-                settings.DEFAULT_FROM_EMAIL,
-                [email],
-                fail_silently=False,
-            )
+                    🔹 Username: {username}
+                    🔹 Password: {random_password}
 
-            messages.success(request, f'User created successfully! Password sent to {username}')
+                    Please click the link below to access the system and change your password immediately:
+                    {login_url}
+
+                    Best regards,
+                    Expense Tracker System Team
+                """
+
+                send_mail(
+                    subject,
+                    message,
+                    settings.DEFAULT_FROM_EMAIL,
+                    [email],
+                    fail_silently=False,
+                )
+                messages.success(request, f'User created successfully! Password sent to {username}')
+
+            except (ValidationError, SMTPException) as e:
+                # Email invalid or sending failed
+                messages.success(request, f'User created successfully')
 
         return redirect('user_management')
     
@@ -82,7 +112,9 @@ def user_management(request):
     search = request.GET.get('search')
 
     users = User.objects.all().order_by('id')
-
+    for user in users:
+        UserProfile.objects.get_or_create(user=user)
+        
     if role:
         users = users.filter(is_superuser=True if role == 'Admin' else False)
     if search:
@@ -92,8 +124,9 @@ def user_management(request):
     paginator = Paginator(users, 10)
     page_number = request.GET.get('page')
     users = paginator.get_page(page_number)
+    roles = Group.objects.all()
 
-    return render(request, 'user_management/user_management.html', {'users': users})
+    return render(request, 'user_management/user_management.html', {'users': users,'roles': roles})
     
 
 @login_required(login_url='login')

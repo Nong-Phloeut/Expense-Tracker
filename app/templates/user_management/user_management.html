@@ -61,7 +61,15 @@
             <td>{{ forloop.counter }}</td>
             <td>{{ user.username }}</td>
             <td>{{ user.email }}</td>
-            <td>{% if user.is_superuser %}Admin{% else %}User{% endif %}</td>
+            <td>
+                {% with role=user.groups.first %}
+                    {% if role %}
+                        {{ role.name }}
+                    {% else %}
+                        No Role
+                    {% endif %}
+                {% endwith %}
+            </td>
             <td>
                 <button 
                     class="btn btn-sm btn-warning" 
@@ -70,10 +78,21 @@
                     data-user-id="{{ user.id }}"
                     data-username="{{ user.username|escape }}"
                     data-email="{{ user.email|escape }}"
-                    data-role="{{ user.is_superuser|yesno:'Admin,User' }}"
+                    {% with role=user.groups.first %}
+                        {% if role %}
+                            data-role="{{ role.id }}"
+                        {% else %}
+                            data-role=""
+                        {% endif %}
+                    {% endwith %}
+                    {% with profile=user.userprofile %}
+                        data-chart-id="{{ profile.chart_id|default:'' }}"
+                    {% endwith %}
                     onclick="editUserFromButton(this)">
                     Edit
                 </button>
+
+
                 <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal"
                     data-url="{% url 'delete_user' user.id %}">
                     Delete
