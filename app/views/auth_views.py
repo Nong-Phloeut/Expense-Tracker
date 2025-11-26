@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
+from app.utils.activity_log import log_activity 
 
 def login_view(request):
     context = {}
@@ -13,9 +14,23 @@ def login_view(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             auth_login(request, user)
+            log_activity(
+                request,
+                action="LOGIN",
+                model_name="User",
+                object_id=user.id,
+                description=f"User login Successfully"
+            )
             return redirect('dashboard')
         else:
             messages.error(request, 'Invalid username or password.')
+            log_activity(
+                request,
+                action="LOGIN",
+                model_name="User",
+                object_id=user.id,
+                description=f"Invalid username or password."
+            )
             context['username'] = username  # keep the username value
             context['password'] = password  # keep the username value
     return render(request, 'login.html')
