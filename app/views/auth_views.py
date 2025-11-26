@@ -18,7 +18,7 @@ def login_view(request):
                 request,
                 action="LOGIN",
                 model_name="User",
-                object_id=user.id,
+                object_id=username,
                 description=f"User login Successfully"
             )
             return redirect('dashboard')
@@ -28,7 +28,7 @@ def login_view(request):
                 request,
                 action="LOGIN",
                 model_name="User",
-                object_id=user.id,
+                object_id=username,
                 description=f"Invalid username or password."
             )
             context['username'] = username  # keep the username value
