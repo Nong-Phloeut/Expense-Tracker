@@ -20,23 +20,30 @@ def user_management(request):
         user_id = request.POST.get('user_id')
         username = request.POST.get('username')
         email = request.POST.get('email')
-        role = request.POST.get('role')
+        role_id = request.POST.get('role')  # this is the group ID
         chart_id = request.POST.get('chartId')
+
+        # ===== Define group first =====
+        group = None
+        if role_id:
+            group = get_object_or_404(Group, id=role_id)
+
         if user_id:
-            group = get_object_or_404(Group, id=role)  # role is group ID from the form
             # Update existing user
             user = get_object_or_404(User, id=user_id)
             user.username = username
             user.email = email
-            # user.is_superuser = True if role == 'Admin' else False
-            user.groups.clear()       # remove old roles
-            user.groups.add(group)    # assign new role
+            user.is_superuser = True if group and group.name == 'Admin' else False
 
+            user.groups.clear()
+            if group:
+                user.groups.add(group)
             user.save()
-       
+
             profile, _ = UserProfile.objects.get_or_create(user=user)
             profile.chart_id = chart_id
             profile.save()
+
             log_activity(
                 request,
                 action="UPDATE",
@@ -47,35 +54,35 @@ def user_management(request):
             messages.success(request, 'User updated successfully!')
         else:
             # Create new user
-            random_password = get_random_string(12)  # 12-char secure password
-            is_superuser = True if role == 'Admin' else False
-            user = User.objects.create_user(username=username, email=email, password=random_password, is_superuser=is_superuser)
-         
+            random_password = get_random_string(12)
+            is_superuser = True if group and group.name == 'Admin' else False
+
+            user = User.objects.create_user(
+                username=username,
+                email=email,
+                password=random_password,
+                is_superuser=is_superuser
+            )
+
+            if group:
+                user.groups.add(group)
+
             profile, _ = UserProfile.objects.get_or_create(user=user)
             profile.chart_id = chart_id
-            user.groups.add(group)
             profile.save()
+
             log_activity(
                 request,
                 action="CREATE",
                 model_name="User",
                 object_id=user.id,
-                description=f"Update username'{user.username}'"
+                description=f"Create username '{user.username}'"
             )
-            # Send password to user via email
-            # Generate absolute login link
-            login_url = request.build_absolute_uri(reverse('login'))
 
-            # Email content
-                    
+            # Send password email
             try:
-                # Validate email format first
                 validate_email(email)
-
-                # Build login URL
                 login_url = request.build_absolute_uri(reverse('login'))
-
-                # Email content
                 subject = "Welcome to Expense Tracker System"
                 message = f"""
                     Hello {username},
@@ -91,43 +98,33 @@ def user_management(request):
                     Best regards,
                     Expense Tracker System Team
                 """
-
-                send_mail(
-                    subject,
-                    message,
-                    settings.DEFAULT_FROM_EMAIL,
-                    [email],
-                    fail_silently=False,
-                )
+                send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [email], fail_silently=False)
                 messages.success(request, f'User created successfully! Password sent to {username}')
-
-            except (ValidationError, SMTPException) as e:
-                # Email invalid or sending failed
-                messages.success(request, f'User created successfully')
+            except (ValidationError, SMTPException):
+                messages.success(request, f'User created successfully (email not sent)')
 
         return redirect('user_management')
-    
-        # ===== Filtering =====
-    role = request.GET.get('roleFilter')
+
+    # ===== Filtering & Pagination =====
+    role_filter = request.GET.get('roleFilter')
     search = request.GET.get('search')
 
     users = User.objects.all().order_by('id')
     for user in users:
         UserProfile.objects.get_or_create(user=user)
-        
-    if role:
-        users = users.filter(is_superuser=True if role == 'Admin' else False)
+
+    if role_filter:
+        users = users.filter(is_superuser=True if role_filter == 'Admin' else False)
     if search:
         users = users.filter(Q(username__icontains=search) | Q(email__icontains=search))
 
-    # ===== Pagination =====
     paginator = Paginator(users, 10)
     page_number = request.GET.get('page')
     users = paginator.get_page(page_number)
     roles = Group.objects.all()
 
-    return render(request, 'user_management/user_management.html', {'users': users,'roles': roles})
-    
+    return render(request, 'user_management/user_management.html', {'users': users, 'roles': roles})
+ 
 
 @login_required(login_url='login')
 def delete_user(request, user_id):
