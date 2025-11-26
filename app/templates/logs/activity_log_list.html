@@ -3,7 +3,89 @@
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2>Activity Logs</h2>
+    <div class="d-flex align-items-center gap-2">
+        {% include 'components/filter_button.html' with target="#activityLogFilterForm" %}
+        <button class="btn btn-success" data-bs-toggle="collapse" data-bs-target="#activityLogModal">
+            <i class="fa fa-file-excel me-2"></i>Generate Report
+        </button>
+    </div>
 </div>
+
+<div id="activityAccordion">
+    <div class="collapse" id="activityLogModal" data-bs-parent="#activityAccordion">
+        <div class="card mb-4">
+            <div class="card-body">
+                <form id="exportForm" method="get" class="row g-3 mb-4 align-items-end"
+                    action="{% url 'export_auditlog_excel' %}">
+
+                    <div class="col-md-3">
+                        <label class="form-label">Start Date</label>
+                        <input type="date" name="start_date" class="form-control">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">End Date</label>
+                        <input type="date" name="end_date" class="form-control">
+                    </div>
+                    <p id="dateError" style="color:red; font-weight:bold; display:none;"></p>
+
+                    <div class="col-md-3 d-flex gap-2">
+                        <button type="button" class="btn btn-secondary"
+                            onclick="window.location.href='{{ request.path }}'">Cancel</button>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fa fa-download me-2"></i>Generate
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="collapse {% if request.GET %}show{% endif %}" id="activityLogFilterForm"
+        data-bs-parent="#activityAccordion">
+        <div class="card mb-4">
+            <div class="card-body">
+                <form method="get" class="row g-3">
+
+                    <!-- Username -->
+                    <div class="col-md-3">
+                        <label class="form-label">Username</label>
+                        <input type="text" name="username" class="form-control" value="{{ request.GET.username }}"
+                            placeholder="Search username">
+                    </div>
+
+                    <!-- Action -->
+                    <div class="col-md-3">
+                        <label class="form-label">Action</label>
+                        <input type="text" name="action" class="form-control" value="{{ request.GET.action }}"
+                            placeholder="Search action">
+                    </div>
+
+                    <!-- Date Range -->
+                    <div class="col-md-3">
+                        <label class="form-label">Start Date</label>
+                        <input type="date" name="start_date" class="form-control" value="{{ request.GET.start_date }}">
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">End Date</label>
+                        <input type="date" name="end_date" class="form-control" value="{{ request.GET.end_date }}">
+                    </div>
+
+                    <div class="col-md-12 d-flex gap-2 justify-content-end">
+                        <button type="submit" class="btn btn-primary w-25">Filter</button>
+                        <button type="button" class="btn btn-secondary w-25"
+                            onclick="window.location.href='{{ request.path }}'">Reset</button>
+                    </div>
+
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <table class="table table-striped table-hover mt-3">
     <thead>
@@ -27,12 +109,12 @@
             <td>{{ log.ip_address }}</td>
             <td>{{ log.created_at|date:"Y-m-d H:i" }}</td>
             <td>
-            {% if request.user.is_superuser or request.user.role == "Admin" %}
+                {% if request.user.is_superuser or request.user.role == "Admin" %}
                 <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal"
                     data-url="{% url 'delete_log' log.id %}">
                     Delete
                 </button>
-            {% endif %}
+                {% endif %}
             </td>
 
         </tr>
@@ -47,3 +129,32 @@
 <!-- ✅ Pagination -->
 {% include 'includes/_pagination.html' with page_obj=page_obj %}
 {% endblock %}
+
+
+<script>
+    document.getElementById("exportForm").addEventListener("submit", function (event) {
+        const start = document.getElementById("modalStartDate").value;
+        const end = document.getElementById("modalEndDate").value;
+        const errorBox = document.getElementById("dateError");
+
+        // Reset error
+        errorBox.style.display = "none";
+        errorBox.innerText = "";
+
+        // Validate empty
+        if (!start || !end) {
+            errorBox.innerText = "❌ Please select both Start Date and End Date.";
+            errorBox.style.display = "block";
+            event.preventDefault();
+            return;
+        }
+
+        // Validate logic
+        if (start > end) {
+            errorBox.innerText = "❌ Start Date cannot be greater than End Date!";
+            errorBox.style.display = "block";
+            event.preventDefault();
+            return;
+        }
+    });
+</script>

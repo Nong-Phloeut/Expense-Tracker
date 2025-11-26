@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from ..models import Role
 from django.contrib.auth.models import Group, Permission
 from django.contrib import messages
+from app.utils.activity_log import log_activity 
 
 def role_list(request):
     groups = Group.objects.prefetch_related('permissions').all()
@@ -24,6 +25,13 @@ def role_create(request):
         else:
             group = Group.objects.create(name=name)
             group.permissions.set(selected_permissions)
+            log_activity(
+                request,
+                action="CREATE",
+                model_name="Role",
+                object_id=group.id,
+                description=f"Created role name'{group.name}'"
+            )
             group.save()
 
             messages.success(request, f"Role '{name}' created successfully.")
@@ -54,6 +62,13 @@ def role_edit(request, role_id):
         else:
             group.name = name_value
             group.save()
+            log_activity(
+                request,
+                action="UPDATE",
+                model_name="Role",
+                object_id=group.id,
+                description=f"Update role name'{group.name}'"
+            )
             group.permissions.set(selected_permissions)
             return redirect('role_list')
 
@@ -67,6 +82,13 @@ def role_edit(request, role_id):
 
 def role_delete(request, role_id):
     group = get_object_or_404(Group, id=role_id)
+    log_activity(
+        request,
+        action="DELETE",
+        model_name="Role",
+        object_id=group.id,
+        description=f"Delete role name'{group.name}'"
+    )
     group.delete()
     messages.success(request, "Role deleted successfully.")
     return redirect('role_list')

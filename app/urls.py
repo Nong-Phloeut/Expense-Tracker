@@ -25,6 +25,7 @@ urlpatterns = [
     path('reports/export/', views.export_expenses_excel, name='export_expenses_excel'),
     path('activity_log', views.activity_log_list, name='activity_log'),
     path('activity_log/delete_log/<int:pk>/', views.delete_log, name='delete_log'),
+    path('activity_log/export/', views.export_auditlog_excel, name='export_auditlog_excel'),
     path('roles/', views.role_list, name='role_list'),
     path('roles/create/', views.role_create, name='role_create'),
     path('roles/<int:role_id>/edit/', views.role_edit, name='role_edit'),   # <-- fix here
