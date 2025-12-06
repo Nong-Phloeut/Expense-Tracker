@@ -1,4 +1,3 @@
-
 services:
   web:
     image: nongdev/expense-tracker:latest
@@ -8,10 +7,37 @@ services:
       - .env
     depends_on:
       - db
+      - redis
     volumes:
       - static_volume:/app/staticfiles
-
     command: gunicorn config.wsgi:application --bind 0.0.0.0:8080
+
+  celery:
+    image: nongdev/expense-tracker:latest
+    container_name: celery-worker
+    restart: always
+    env_file:
+      - .env
+    depends_on:
+      - web
+      - redis
+    command: celery -A config worker -l info
+
+  celery-beat:
+    image: nongdev/expense-tracker:latest
+    container_name: celery-beat
+    restart: always
+    env_file:
+      - .env
+    depends_on:
+      - web
+      - redis
+    command: celery -A config beat -l info
+
+  redis:
+    image: redis:7
+    container_name: redis
+    restart: always
 
   nginx:
     image: nongdev/expense-tracker-nginx:latest
