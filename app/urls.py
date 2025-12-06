@@ -30,5 +30,9 @@ urlpatterns = [
     path('roles/create/', views.role_create, name='role_create'),
     path('roles/<int:role_id>/edit/', views.role_edit, name='role_edit'),   # <-- fix here
     path('roles/<int:role_id>/delete/', views.role_delete, name='role_delete'),
+    path('notifications/', views.notifications_view, name='notifications'),
+    path('notifications/mark-read/<int:pk>/', views.mark_notification_read, name='mark_notification_read'),
+    path('notifications/delete/<int:pk>/', views.delete_notification, name='delete_notification'),
+    path('notifications/mark-all-read/', views.mark_all_notifications_read, name='mark_all_notifications_read'),
 ]
     

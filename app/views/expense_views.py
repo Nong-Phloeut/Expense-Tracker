@@ -6,6 +6,7 @@ from django.core.paginator import Paginator
 from ..models import Expense, Category
 from app.utils.telegram_utils import check_alerts 
 from app.utils.activity_log import log_activity 
+from app.views.notification_views import create_notification 
 from django.urls import reverse
 
 @login_required(login_url='login')

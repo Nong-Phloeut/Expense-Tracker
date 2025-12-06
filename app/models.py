@@ -126,3 +126,30 @@ class Role(models.Model):
     
     def __str__(self):
         return self.name
+
+
+class Notification(models.Model):
+    # The user who will receive the notification
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+    
+    # Notification content
+    title = models.CharField(max_length=100)
+    message = models.TextField()
+    
+    # Status of notification
+    is_read = models.BooleanField(default=False)
+    
+    # Timestamp
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-created_at']  # newest first
+    
+    def __str__(self):
+        return f"{self.title} - {'Read' if self.is_read else 'Unread'}"
+    
+    # Mark notification as read
+    def mark_as_read(self):
+        self.is_read = True
+        self.save()

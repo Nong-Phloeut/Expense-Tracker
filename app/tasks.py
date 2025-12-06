@@ -1,6 +1,7 @@
 from celery import shared_task
 from django.utils import timezone
-from .models import RecurringExpense
+from .models import RecurringExpense, Notification
+
 from app.utils.telegram_utils import send_telegram_message
 
 @shared_task
@@ -17,6 +18,13 @@ def check_recurring_expenses():
             f"Expense: {exp.name}\n"
             f"Amount: {exp.amount}\n"
             f"Category: {exp.category.name if exp.category else 'None'}"
+        )
+
+        Notification.objects.create(
+            user=exp.user,
+            title=f"Recurring Expense: {exp.name}",
+            message=message,
+            is_read=False
         )
         send_telegram_message(message)
 

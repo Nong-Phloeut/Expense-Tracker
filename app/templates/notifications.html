@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-bell me-3"></i> Notifications</h2>
+
+        <!-- Filter Buttons -->
+        <div class="d-flex align-items-center gap-2">
+            <!-- ALL -->
+            <a href="?filter="
+                class="btn {% if not filter_option %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                All
+            </a>
+
+            <!-- UNREAD -->
+            <a href="?filter=unread"
+                class="btn {% if filter_option == 'unread' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                <i class="fa fa-eye-slash me-2"></i> Unread
+            </a>
+            <!-- MARK ALL AS READ -->
+            <a href="{% url 'mark_all_notifications_read' %}" class="btn btn-outline-success ms-2">
+                <i class="fa fa-check me-2"></i> Mark All as Read
+            </a>
+        </div>
+    </div>
+
+    <div class="notification-list-container">
+        {% for notification in notifications %}
+        <div class="notification-card {% if not notification.is_read %}notification-unread{% endif %} d-flex align-items-center"
+            data-id="{{ notification.pk }}" data-bs-toggle="modal" data-bs-target="#notificationDetailModal"
+            data-title="{{ notification.title }}" data-message="{{ notification.message|linebreaksbr }}"
+            data-time="{{ notification.created_at|date:" M d, Y • h:i A" }}">
+
+            <!-- Unread indicator -->
+            {% if not notification.is_read %}
+            <div class="unread-indicator me-3"></div>
+            {% endif %}
+
+            <div class="notification-content flex-grow-1">
+                <div class="fw-bold notification-title">{{ notification.title }}</div>
+                <div class="notification-message text-secondary"> {{ notification.message|truncatechars:80 }}</div>
+                <div class="notification-time mt-1">{{ notification.created_at|date:"M d, Y • h:i A" }}</div>
+            </div>
+
+            <div class="notification-actions ms-3 d-flex align-items-center">
+                {% if not notification.is_read %}
+                <a href="{% url 'mark_notification_read' notification.pk %}"
+                    class="mark-read-btn btn btn-sm btn-outline-primary me-2">Mark as read</a>
+                {% endif %}
+                <a href="{% url 'delete_notification' notification.pk %}" class="text-danger delete-btn">
+                    <i class="fas fa-trash fa-lg"></i>
+                </a>
+            </div>
+        </div>
+        {% empty %}
+        <div class="text-center text-muted py-5">
+            <i class="far fa-bell fa-2x mb-3"></i>
+            <p class="lead">No notifications yet. You're all caught up!</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Notification Detail Modal -->
+<div class="modal fade" id="notificationDetailModal" tabindex="-1" aria-labelledby="notificationDetailModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title" id="notificationDetailModalLabel">Notification Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Content injected via JS -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script>
+    var notificationModal = document.getElementById('notificationDetailModal');
+
+    notificationModal.addEventListener('hidden.bs.modal', function () {
+        // Reload the page when modal is closed
+        location.reload();
+    });
+
+    // Mark as read click
+    document.querySelectorAll('.mark-read-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const item = this.closest('.notification-card');
+            item.classList.remove('notification-unread');
+        });
+    });
+
+    // Delete notification click
+    document.querySelectorAll('.fa-trash').forEach(icon => {
+        icon.addEventListener('click', function () {
+            const item = this.closest('.notification-card');
+            item.remove();
+        });
+    });
+
+    // Populate modal with notification details
+    var notificationModal = document.getElementById('notificationDetailModal');
+    notificationModal.addEventListener('show.bs.modal', function (event) {
+        var card = event.relatedTarget;
+
+        var title = card.getAttribute('data-title');
+        var message = card.getAttribute('data-message');
+        var time = card.getAttribute('data-time');
+        var id = card.getAttribute('data-id');
+
+        var modalTitle = notificationModal.querySelector('.modal-title');
+        var modalBody = notificationModal.querySelector('.modal-body');
+
+        modalTitle.textContent = title;
+        modalBody.innerHTML = `
+            <p><strong>Time:</strong> ${time}</p>
+            <hr>
+            <p>${message}</p>
+        `;
+
+            // Mark as read via AJAX
+        fetch(`/notifications/mark-read/${id}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json',
+        },
+    })
+
+    });
+</script>
+{% endblock %}
