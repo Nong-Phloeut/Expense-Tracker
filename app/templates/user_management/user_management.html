@@ -52,6 +52,7 @@
             <th>Username</th>
             <th>Email</th>
             <th>Role</th>
+            <th>Telegram chart ID</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -70,6 +71,9 @@
                     {% endif %}
                 {% endwith %}
             </td>
+            <td>   {% with profile=user.userprofile %}
+                        {{ profile.chart_id|default:'No' }}
+                    {% endwith %}</td>
             <td>
                 <button 
                     class="btn btn-sm btn-warning" 

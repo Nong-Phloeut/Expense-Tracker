@@ -45,3 +45,32 @@ password super user : 123
 // new featur 
 
 add filter in Audit log and export 
+
+✅ **Notes:**
+
+- Always start **worker first**, then **beat**, then **Django server**.  
+    ## celery -A config worker -l info
+    ## celery -A config beat -l info
+- Each command should run in its **own terminal window**.  
+- For testing tasks manually, you can use the Django shell.  
+
+---
+
+I can also rewrite it in a **super simple 3-step version** if you want it **short and easy for new devs**. Do you want me to do that?
+
+**1️⃣ Open Django shell**
+
+From your project root:
+
+python manage.py shell
+
+
+You should see the Python prompt:
+
+>>> 
+
+2️⃣ Import your Celery task
+from app.tasks import check_recurring_expenses
+
+3️⃣ Trigger the task with the test flag
+check_recurring_expenses.delay(force_send=True)

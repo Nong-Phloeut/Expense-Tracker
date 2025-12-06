@@ -1,5 +1,8 @@
+# config/seetings.py
+
 from pathlib import Path
 from decouple import config
+from celery.schedules import crontab
 import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -68,6 +71,17 @@ DATABASES = {
         "HOST": config("POSTGRES_HOST", default="localhost"),
         "PORT": config("POSTGRES_PORT", default="5432"),
     }
+}
+
+CELERY_BEAT_SCHEDULE = {
+    "check_recurring_daily": {
+        "task": "app.tasks.check_recurring_expenses",
+        "schedule": crontab(minute="*/1"),  # runs midnight
+    },
+    #  "check_recurring_expenses_test": {
+    #     "task": "app.tasks.check_recurring_expenses",
+    #     "schedule": 60.0,  # every 60 seconds
+    # },
 }
 
 STATIC_URL = '/static/'
