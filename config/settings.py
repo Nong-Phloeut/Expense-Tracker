@@ -73,6 +73,8 @@ DATABASES = {
     }
 }
 
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL")
+CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND")
 CELERY_BEAT_SCHEDULE = {
     "check_recurring_daily": {
         "task": "app.tasks.check_recurring_expenses",
