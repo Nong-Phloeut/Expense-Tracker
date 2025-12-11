@@ -6,21 +6,30 @@
     <h2>Category Management</h2>
 
     <div class="d-flex align-items-center gap-2">
-        <!-- Filter icon -->
-        <div class="dropdown">
-            <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="filterDropdown"
-                data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="bi bi-funnel"></i> Filter
-            </button>
-            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="filterDropdown">
-                <li><a class="dropdown-item" href="?filter=recent">Recently Added</a></li>
-                <li><a class="dropdown-item" href="?filter=az">A–Z</a></li>
-                <li><a class="dropdown-item" href="?filter=za">Z–A</a></li>
-            </ul>
-        </div>
+
+        {% include 'components/filter_button.html' with target="#categoryFormFilter" %}
 
         <!-- Add category button -->
-        {% include 'components/add_button.html' with title="Add Category" target="#categoryModal" onclick="resetForm()" %}
+        {% include 'components/add_button.html' with title="Add Category" target="#categoryModal" onclick="resetForm()"%}
+    </div>
+</div>
+
+<!-- filter -->
+<div class="collapse {% if request.GET.name %}show{% endif %}" id="categoryFormFilter">
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-1 mb-4 align-items-end">
+                <div class="col-md-3">
+                    <label for="name" class="form-label">Category Name</label>
+                    <input type="text" id="name" name="name" class="form-control" value="{{ request.GET.name }}">
+                </div>
+
+                <div class="col-md-3 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary w-100">Filter</button>
+                    <button type="button" class="btn btn-secondary w-100" onclick="resetFilter()">Reset</button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
@@ -41,7 +50,7 @@
             <td>{{ cat.name }}</td>
             <td>{{ cat.description|default_if_none:'' }}</td>
             <td class="text-start">
-            
+
                 <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#categoryModal"
                     onclick="editCategory('{{ cat.id }}', '{{ cat.name|default_if_none:'' }}', '{{ cat.description|default_if_none:'' }}')">
                     Edit
@@ -54,7 +63,7 @@
         </tr>
         {% empty %}
         <tr>
-            <td colspan="3" class="text-center text-muted">No categories found</td>
+            <td colspan="4" class="text-center text-muted">No categories found</td>
         </tr>
         {% endfor %}
     </tbody>
@@ -83,8 +92,9 @@
                     </div>
                     <div class="mb-3">
                         <label for="description" class="form-label fw-semibold">Description</label>
-                        <input type="text" class="form-control" id="description" name="description"
-                            placeholder="Enter description">
+                       <input type="text" class="form-control" id="description" name="description"
+                            placeholder="Enter description" maxlength="100">
+                        <small class="text-muted">Max 100 characters</small>
                     </div>
                 </div>
 
@@ -111,6 +121,11 @@
         document.getElementById('categoryId').value = '';
         document.getElementById('categoryModalLabel').innerText = 'Add Category';
     }
+    
+    function resetFilter() {
+        window.location.href = window.location.pathname;
+    }
+
 </script>
 
 {% endblock %}

@@ -9,15 +9,16 @@
         <div class="d-flex align-items-center gap-2">
             <!-- ALL -->
             <a href="?filter="
-                class="btn {% if not filter_option %}btn-primary{% else %}btn-outline-primary{% endif %}">
+               class="btn {% if not filter_option %}btn-primary{% else %}btn-outline-primary{% endif %}">
                 All
             </a>
 
             <!-- UNREAD -->
             <a href="?filter=unread"
-                class="btn {% if filter_option == 'unread' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+               class="btn {% if filter_option == 'unread' %}btn-primary{% else %}btn-outline-primary{% endif %}">
                 <i class="fa fa-eye-slash me-2"></i> Unread
             </a>
+
             <!-- MARK ALL AS READ -->
             <a href="{% url 'mark_all_notifications_read' %}" class="btn btn-outline-success ms-2">
                 <i class="fa fa-check me-2"></i> Mark All as Read
@@ -28,9 +29,10 @@
     <div class="notification-list-container">
         {% for notification in notifications %}
         <div class="list-group">
-            <li class="{% if not notification.is_read %}notification-unread{% endif %} list-group-item d-flex justify-content-between align-items-center mt-1 ist-group-item-action"
-                data-id="{{ notification.pk }}" data-bs-toggle="modal" data-bs-target="#notificationDetailModal"
-                data-title="{{ notification.title }}" data-message="{{ notification.message|linebreaksbr }}"
+            <li class="list-group-item d-flex justify-content-between align-items-center mt-1 list-group-item-action"
+                data-id="{{ notification.pk }}"
+                data-title="{{ notification.title }}"
+                data-message="{{ notification.message|linebreaksbr }}"
                 data-time="{{ notification.created_at|date:" M d, Y • h:i A" }}">
 
                 <!-- Unread indicator -->
@@ -40,19 +42,32 @@
 
                 <div class="notification-content flex-grow-1">
                     <div class="fw-bold notification-title">{{ notification.title }}</div>
-                    <div class="notification-message text-secondary"> {{ notification.message|truncatechars:80 }}</div>
+                    <div class="notification-message text-secondary">{{ notification.message|truncatechars:80 }}</div>
                     <div class="notification-time mt-1">{{ notification.created_at|date:"M d, Y • h:i A" }}</div>
                 </div>
 
-                <div class="notification-actions ms-3 d-flex align-items-center">
+                <div class="notification-actions ms-3 d-flex align-items-center gap-2">
+
                     {% if not notification.is_read %}
                     <a href="{% url 'mark_notification_read' notification.pk %}"
-                        class="mark-read-btn btn btn-sm btn-outline-primary me-2">Mark as read</a>
-                    {% endif %}
-                    <a href="{% url 'delete_notification' notification.pk %}" class="text-danger delete-btn">
-                        <i class="fas fa-trash fa-lg"></i>
+                       class="mark-read-btn btn btn-sm btn-outline-primary rounded-pill px-3">
+                        <i class="fas fa-check me-1"></i> Mark as read
                     </a>
+                    {% endif %}
+
+                    <!-- Eye icon opens modal -->
+                    <a href="javascript:void(0);"
+                        class="btn btn-sm btn-primary border rounded-circle d-flex align-items-center justify-content-center p-2 view-btn">
+                        <i class="fas fa-eye"></i>
+                    </a>
+
+                    <a href="{% url 'delete_notification' notification.pk %}"
+                       class="btn btn-sm btn-light text-danger border rounded-circle d-flex align-items-center justify-content-center p-2">
+                        <i class="fas fa-trash"></i>
+                    </a>
+
                 </div>
+
             </li>
         </div>
         {% empty %}
@@ -85,65 +100,76 @@
 
 <!-- Scripts -->
 <script>
-    var notificationModal = document.getElementById('notificationDetailModal');
+document.addEventListener('DOMContentLoaded', function () {
 
-    notificationModal.addEventListener('hidden.bs.modal', function () {
-        // Reload the page when modal is closed
-        location.reload();
+    // Eye icon click opens modal
+    document.querySelectorAll('.view-btn').forEach(btn => {
+        btn.addEventListener('click', function (e) {
+            e.stopPropagation(); // prevent list item click
+
+            const li = this.closest('li');
+
+            const title = li.getAttribute('data-title');
+            const message = li.getAttribute('data-message');
+            const time = li.getAttribute('data-time');
+            const id = li.getAttribute('data-id');
+
+            const modal = new bootstrap.Modal(document.getElementById('notificationDetailModal'));
+            const modalTitle = document.querySelector('#notificationDetailModal .modal-title');
+            const modalBody = document.querySelector('#notificationDetailModal .modal-body');
+
+            modalTitle.textContent = title;
+            modalBody.innerHTML = `
+                <p><strong>Time:</strong> ${time}</p>
+                <hr>
+                <p>${message}</p>
+            `;
+
+            modal.show();
+
+            // Optional: mark as read via AJAX
+            fetch(`/notifications/mark-read/${id}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/json',
+                },
+            });
+        });
     });
 
-    // Mark as read click
+    // Mark as read button (optional visual update)
     document.querySelectorAll('.mark-read-btn').forEach(btn => {
         btn.addEventListener('click', function () {
-            const item = this.closest('.notification-card');
-            item.classList.remove('notification-unread');
+            const li = this.closest('li');
+            li.classList.remove('notification-unread');
         });
     });
 
-    // Delete notification click
+    // Delete notification (optional visual update)
     document.querySelectorAll('.fa-trash').forEach(icon => {
-        icon.addEventListener('click', function () {
-            const item = this.closest('.notification-card');
-            item.remove();
+        icon.addEventListener('click', function (e) {
+            e.stopPropagation(); // prevent modal
+            const li = this.closest('li');
+            li.remove();
         });
     });
 
-    // Populate modal with notification details
-    var notificationModal = document.getElementById('notificationDetailModal');
-    notificationModal.addEventListener('show.bs.modal', function (event) {
-        var card = event.relatedTarget;
+});
 
-        var title = card.getAttribute('data-title');
-        var message = card.getAttribute('data-message');
-        var time = card.getAttribute('data-time');
-        var id = card.getAttribute('data-id');
+    const notificationModal = document.getElementById('notificationDetailModal');
 
-        var modalTitle = notificationModal.querySelector('.modal-title');
-        var modalBody = notificationModal.querySelector('.modal-body');
-
-        modalTitle.textContent = title;
-        modalBody.innerHTML = `
-            <p><strong>Time:</strong> ${time}</p>
-            <hr>
-            <p>${message}</p>
-        `;
-
-        // Mark as read via AJAX
-        fetch(`/notifications/mark-read/${id}/`, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': '{{ csrf_token }}',
-                'Content-Type': 'application/json',
-            },
-        })
-
+    // Listen for the 'hidden.bs.modal' event (fires after modal is fully closed)
+    notificationModal.addEventListener('hidden.bs.modal', function () {
+        // Reload the page
+        location.reload();
     });
 </script>
 
 <style>
-    .list-group-item {
-        cursor: pointer;
-    }
+.list-group-item {
+    cursor: pointer;
+}
 </style>
 
 {% endblock %}

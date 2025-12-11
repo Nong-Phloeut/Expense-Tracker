@@ -12,6 +12,10 @@ def category_management(request):
         name = request.POST.get('name')
         description = request.POST.get('description') or ''
 
+        if len(description) > 100:
+                messages.error(request, "Description cannot exceed 100 characters.")
+                return redirect(request.path)
+        
         if category_id:
             # Update existing category
             category = get_object_or_404(Category, id=category_id)
@@ -23,7 +27,7 @@ def category_management(request):
                 action="UPDATE",
                 model_name="Category",
                 object_id=category.id,
-                description=f"Update category name'{category.name}'"
+                description=f"Update category name '{category.name}'"
             )
             messages.success(request, f"Category '{name}' updated successfully!")
         else:
@@ -37,18 +41,24 @@ def category_management(request):
                 action="CREATE",
                 model_name="Category",
                 object_id=category.id,
-                description=f"Create category name'{category.name}'"
+                description=f"Create category name '{category.name}'"
             )
             messages.success(request, f"Category '{name}' added successfully!")
 
+    # ---------------- Filter by GET parameters ----------------
+    categories = Category.objects.all().order_by('id')
+    name_filter = request.GET.get('name')
+    if name_filter:
+        categories = categories.filter(name__icontains=name_filter)
 
-    all_categories = Category.objects.all().order_by('id')
-    paginator = Paginator(all_categories, 10)
+    # Pagination
+    paginator = Paginator(categories, 10)
     page_number = request.GET.get('page')
     categories = paginator.get_page(page_number)
 
     return render(request, 'category_management/categories.html', {
-        'categories': categories
+        'categories': categories,
+        'name_filter': name_filter,  # Pass to template
     })
 
 @login_required(login_url='login')
