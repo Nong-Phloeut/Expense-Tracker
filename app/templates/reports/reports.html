@@ -60,7 +60,7 @@
                 <h6>Highest Expense</h6>
                 <h4>
                     {% if highest_expense %}
-                    {{ highest_expense.category.name }} (${{ highest_expense.amount|floatformat:2 }})
+                    {{ highest_expense.category.name }} (${{ highest_expense.amount|floatformat:2|intcomma }})
                     {% else %}
                     N/A
                     {% endif %}
