@@ -31,6 +31,11 @@ def user_management(request):
         if user_id:
             # Update existing user
             user = get_object_or_404(User, id=user_id)
+                  # Check if new username conflicts with another user
+            if User.objects.exclude(id=user_id).filter(username=username).exists():
+                messages.warning(request, f"Username '{username}' already exists.")
+                return redirect('user_management')
+            
             user.username = username
             user.email = email
             user.is_superuser = True if group and group.name == 'Admin' else False
@@ -54,6 +59,11 @@ def user_management(request):
             messages.success(request, 'User updated successfully!')
         else:
             # Create new user
+            # Check if username already exists
+            if User.objects.filter(username=username).exists():
+                messages.warning(request, f"Username '{username}' already exists.")
+                return redirect('user_management')
+            
             random_password = get_random_string(12)
             is_superuser = True if group and group.name == 'Admin' else False
 
@@ -98,10 +108,11 @@ def user_management(request):
                     Best regards,
                     Expense Tracker System Team
                 """
-                send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [email], fail_silently=False)
+                send_mail(subject, message, 'phloeutnong@gmail.com', ['nongphoeut@gmail.com'], fail_silently=False)
                 messages.success(request, f'User created successfully! Password sent to {username}')
-            except (ValidationError, SMTPException):
-                messages.success(request, f'User created successfully (email not sent)')
+            except Exception as e:
+                messages.error(request, f'User created successfully but email not sent. Error: {e}')
+
 
         return redirect('user_management')
 

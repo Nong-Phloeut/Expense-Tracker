@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load humanize %}
 {% block title %}Alerts{% endblock %}
 
 {% block content %}
@@ -79,7 +80,7 @@
                 {% endif %}
             </td>
             <td>{{ alert.condition }}</td>
-            <td>${{ alert.amount }}</td>
+            <td>${{ alert.amount|floatformat:2|intcomma }}</td>
             <td>
                 {% if alert.status == 'active' %}
                 <span class="badge bg-success">{{ alert.status|title }}</span>

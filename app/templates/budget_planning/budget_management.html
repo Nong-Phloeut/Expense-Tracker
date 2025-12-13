@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% block title %}Budget Planning{% endblock %}
-
+{% load humanize %}
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2>Budget Planning</h2>
@@ -98,7 +98,7 @@
                 {% endif %}
             </td>
 
-            <td>${{ budget.amount }}</td>
+            <td>${{ budget.amount|floatformat:2|intcomma }}</td>
             <td>{{ budget.start_date }}</td>
             <td>{{ budget.end_date }}</td>
             <td>
