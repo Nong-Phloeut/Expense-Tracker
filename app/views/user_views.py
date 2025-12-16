@@ -108,8 +108,8 @@ def user_management(request):
                     Best regards,
                     Expense Tracker System Team
                 """
-                send_mail(subject, message, 'phloeutnong@gmail.com', ['nongphoeut@gmail.com'], fail_silently=False)
-                messages.success(request, f'User created successfully! Password sent to {username}')
+                send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [email], fail_silently=False)
+                messages.success(request, f'User created successfully!')
             except Exception as e:
                 messages.error(request, f'User created successfully but email not sent. Error: {e}')
 
