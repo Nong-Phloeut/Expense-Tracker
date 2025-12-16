@@ -19,8 +19,9 @@ EMAIL_HOST = 'smtp.gmail.com'  # or your provider
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
+EMAIL_HOST_USER = 'phloeutnong@gmail.com'
+EMAIL_HOST_PASSWORD = 'zvyiexnegzezhwwq'
 DEFAULT_FROM_EMAIL = 'phloeutnong@gmail.com'
-EMAIL_HOST_PASSWORD = 'zvyi exne gzez hwwq'
 
 INSTALLED_APPS = [
     'django.contrib.admin',
