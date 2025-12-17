@@ -52,6 +52,11 @@ class RecurringExpense(models.Model):
     frequency = models.CharField(max_length=50)  # e.g., 'daily', 'weekly', 'monthly'
     start_date = models.DateField(null=True, blank=True) 
     next_due_date = models.DateField()
+    last_reminder_days = models.IntegerField(
+        null=True,
+        blank=True,
+        help_text="Last reminder sent (days before due date)"
+    )
 
 class Alert(models.Model):
     STATUS_CHOICES = [

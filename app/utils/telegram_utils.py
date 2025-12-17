@@ -6,7 +6,7 @@ BOT_TOKEN = config('TELEGRAM_BOT_TOKEN')
 CHAT_ID = config('TELEGRAM_CHAT_ID')  # Can be global or per user
 
 def send_telegram_message(message, chat_id=None):
-    chat_id = chat_id or CHAT_ID
+    # chat_id = chat_id or CHAT_ID
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
     data = {"chat_id": chat_id, "text": message}
     try:
@@ -19,6 +19,11 @@ def check_alerts(user, amount, category=None):
     triggered_alerts = []
 
     for alert in alerts:
+        profile = getattr(alert.user, "userprofile", None)
+        if not profile or not profile.chart_id:
+            continue  # skip users without telegram chat_id
+
+        chat_id = profile.chart_id
 
         # category rule
         if alert.category and alert.category != category:
@@ -33,7 +38,7 @@ def check_alerts(user, amount, category=None):
                 "Please review your expenses to avoid exceeding your budget."
             )
             triggered_alerts.append(msg)
-            send_telegram_message(msg)
+            send_telegram_message(msg, chat_id=chat_id)
 
             Notification.objects.create(
                 user=user,

@@ -87,6 +87,7 @@
             <th>Frequency</th>
             <th>Start Date</th>
             <th>Next Due Date</th>
+            <th>Last Reminder Days</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -100,6 +101,9 @@
             <td>{{ expense.start_date }}</td>
             <td>{{ expense.next_due_date }}</td>
             <td>
+                {{ expense.last_reminder_days|default:0 }} {{ expense.last_reminder_days|default:0|pluralize:"Day,Days" }} before
+            </td>
+            <td>
                 <button class="btn btn-sm btn-warning edit-btn" data-bs-toggle="modal"
                     data-bs-target="#recurringModal" data-id="{{ expense.id }}"
                     data-category="{{ expense.category.id }}"
@@ -107,7 +111,8 @@
                     data-amount="{{ expense.amount }}"
                     data-frequency="{{ expense.frequency }}"
                     data-start_date="{{ expense.start_date|date:'Y-m-d' }}"
-                    data-next_due_date="{{ expense.next_due_date|date:'Y-m-d' }}">
+                    data-next_due_date="{{ expense.next_due_date|date:'Y-m-d' }}"
+                    data-last_reminder_days="{{ expense.last_reminder_days }}">
                     Edit
                 </button>
                 <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal"
@@ -147,6 +152,7 @@
                 document.getElementById('frequency').value = this.dataset.frequency;
                 document.getElementById('start_date').value = this.dataset.start_date;
                 document.getElementById('next_due_date').value = this.dataset.next_due_date;
+                document.getElementById('last_reminder_days').value = this.dataset.last_reminder_days;
                 document.getElementById('recurringModalLabel').innerText = 'Edit Recurring Expense';
 
             });

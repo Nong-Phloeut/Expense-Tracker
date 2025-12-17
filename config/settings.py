@@ -82,13 +82,8 @@ CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND")
 CELERY_BEAT_SCHEDULE = {
     "check_recurring_daily": {
         "task": "app.tasks.check_recurring_expenses",
-        "schedule": 86400, # every 24 hours # once a day
-        # crontab(minute="*/1"),  # runs midnight
+        "schedule": 86400,
     },
-    #  "check_recurring_expenses_test": {
-    #     "task": "app.tasks.check_recurring_expenses",
-    #     "schedule": 60.0,  # every 60 seconds
-    # },
 }
 
 STATIC_URL = '/static/'

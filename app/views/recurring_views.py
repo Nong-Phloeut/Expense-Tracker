@@ -52,6 +52,7 @@ def recurring_expenses(request):
         frequency = request.POST.get('frequency')
         start_date = request.POST.get('start_date')
         next_due_date = request.POST.get('next_due_date')
+        last_reminder_days = request.POST.get('last_reminder_days')
 
         category = get_object_or_404(Category, id=category_id) if category_id else None
 
@@ -63,6 +64,7 @@ def recurring_expenses(request):
             expense.frequency = frequency
             expense.start_date = start_date
             expense.next_due_date = next_due_date
+            expense.last_reminder_days = last_reminder_days
             expense.save()
             log_activity(
                 request,
@@ -81,6 +83,7 @@ def recurring_expenses(request):
                 frequency=frequency,
                 start_date=start_date,
                 next_due_date=next_due_date,
+                last_reminder_days=last_reminder_days,
             )
             log_activity(
                 request,
